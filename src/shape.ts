@@ -7,27 +7,38 @@ export namespace Shape {
   export interface IText extends IVector {
     font: Font | IFont;
     stroked?: boolean;
+    color?: string | CanvasPattern | CanvasGradient;
   }
 
   export class Text extends ApparatusObject<Text> {
     font: Font;
     stroked: boolean;
+    center: Vector;
     constructor(public content: string, options: IText) {
       super();
       this.position = new Vector(options);
       this.font = options.font instanceof Font ? options.font : new Font(options.font);
       this.stroked = options.stroked || false;
+      this.color = options.color || "#222222";
+
+      // let width = context.measureText(this.content).width;
+      // let height = context.measureText("M").width;
+      // this.center = new Vector({ x: width / 2, y: height / 2 });
     }
+
     draw(context: CanvasRenderingContext2D): Text {
-      let record = context.font;
+      let recordFont = context.font;
+      let recordStyle = context.fillStyle;
       context.font = this.font.create();
+      context.fillStyle = this.color;
 
       if (this.stroked) {
         context.strokeText(this.content, this.position.x, this.position.y + this.font.size);
       } else {
         context.fillText(this.content, this.position.x, this.position.y + this.font.size);
       }
-      context.font = record;
+      context.fillStyle = recordStyle;
+      context.font = recordFont;
 
       return this;
     }
@@ -40,6 +51,7 @@ export namespace Shape {
   }
 
   export class Line extends ApparatusObject<Line> {
+    // TODO: ADD CENTER POINT
     rotation: number;
     length: number;
     endposition: Vector;
@@ -68,6 +80,37 @@ export namespace Shape {
     }
   }
 
+  export interface ICircle extends IVector {
+    radius: number;
+    stroked?: boolean;
+    color?: string | CanvasPattern | CanvasGradient;
+  }
+
+  export class Circle extends ApparatusObject<Circle> {
+    radius: number;
+    center: Vector;
+    stroked: boolean;
+    constructor(options: ICircle) {
+      super();
+      this.position = new Vector(options);
+      this.radius = options.radius;
+      this.color = options.color || "#222222";
+      this.stroked = options.stroked || false;
+    }
+    draw(context: CanvasRenderingContext2D): Circle {
+      let record = context.fillStyle;
+      context.fillStyle = this.color;
+      context.beginPath();
+      context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+      this.stroked ? context.stroke() : context.fill();
+      context.fillStyle = record;
+      return this;
+    }
+    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
+      return new Vector(this.position);
+    }
+  }
+
   export interface IRectangle extends ISize, IVector {
     color?: string | CanvasPattern | CanvasGradient;
   }
@@ -82,10 +125,10 @@ export namespace Shape {
       this.position = new Vector(options);
       this.color = options.color || "#222222";
       this.rotation = 0;
-      this.center = new Vector({
-        x: this.position.x + this.size.width / 2,
-        y: this.position.y + this.size.height / 2,
-      });
+      // this.center = new Vector({
+      //   x: this.position.x + this.size.width / 2,
+      //   y: this.position.y + this.size.height / 2,
+      // });
     }
     draw(context: CanvasRenderingContext2D): Rectangle {
       let record = context.fillStyle;

@@ -51,6 +51,9 @@ export class ApparatusObject<T> {
     scene.add((this as unknown) as ApparatusObject<TShape>);
     return (this as unknown) as T;
   }
+  getCenterPosition(context: CanvasRenderingContext2D): Vector {
+    return new Vector({ x: undefined, y: undefined });
+  }
 }
 
 export * from "./vector";
