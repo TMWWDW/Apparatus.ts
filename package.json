@@ -1,0 +1,28 @@
+{
+  "name": "apparatus.ts",
+  "version": "1.0.0",
+  "description": "Apparatus.ts is a very basic 2D Render Engine for browser JavaScript run-times using Canvas API, written in TypeScript",
+  "main": "src/apparatus.ts",
+  "dependencies": {
+    "cssnano": "^4.1.10",
+    "typescript": "^3.9.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "dev": "parcel index.html"
+  },
+  "keywords": [
+    "render",
+    "2d",
+    "engine",
+    "javascript",
+    "typescript",
+    "canvas"
+  ],
+  "author": "Muhammed Ali CAN",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TMWWDW/Apparatus.ts.git"
+  }
+}
