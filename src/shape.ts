@@ -95,6 +95,65 @@ export namespace Shape {
     }
   }
 
+  export interface ITriangle {
+    a: IVector;
+    b: IVector;
+    c: IVector;
+    stroked?: boolean;
+    color?: string | CanvasPattern | CanvasGradient;
+    rotation?: number;
+  }
+
+  export class Triangle extends ApparatusObject<Triangle> {
+    points: Vector[];
+    stroked: boolean;
+    rotation: number;
+    constructor(options: ITriangle) {
+      super();
+      this.position = new Vector(options.a);
+      this.points = [new Vector(options.a), new Vector(options.b), new Vector(options.c)];
+      this.color = options.color || "#222222";
+      this.stroked = options.stroked || false;
+    }
+    draw(context: CanvasRenderingContext2D): Triangle {
+      let center = this.getCenterPosition();
+
+      context.beginPath();
+      context.translate(center.x, center.y);
+      context.rotate((this.rotation * Math.PI) / 180);
+      context.translate(-center.x, -center.y);
+      context.moveTo(this.points[0].x, this.points[0].y);
+      context.lineTo(this.points[1].x, this.points[1].y);
+      context.lineTo(this.points[2].x, this.points[2].y);
+      context.lineTo(this.points[0].x, this.points[0].y);
+      context.translate(center.x, center.y);
+      context.rotate((-this.rotation * Math.PI) / 180);
+      context.translate(-center.x, -center.y);
+
+      if (this.stroked) {
+        let record = context.strokeStyle;
+        context.strokeStyle = this.color;
+        context.stroke();
+        context.strokeStyle = record;
+      } else {
+        let record = context.fillStyle;
+        context.fillStyle = this.color;
+        context.fill();
+        context.fillStyle = record;
+      }
+      return this;
+    }
+    rotate(angle: number): Triangle {
+      this.rotation = angle;
+      return this;
+    }
+    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
+      let x = (this.points[0].x + this.points[1].x + this.points[2].x) / 3;
+      let y = (this.points[0].y + this.points[1].y + this.points[2].y) / 3;
+      return new Vector({ x, y });
+    }
+  }
+
   export interface ICircle extends IVector {
     radius: number;
     stroked?: boolean;
@@ -112,12 +171,24 @@ export namespace Shape {
       this.stroked = options.stroked || false;
     }
     draw(context: CanvasRenderingContext2D): Circle {
-      let record = context.fillStyle;
+      // let record = context.fillStyle;
       context.fillStyle = this.color;
       context.beginPath();
       context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-      this.stroked ? context.stroke() : context.fill();
-      context.fillStyle = record;
+      // this.stroked ? context.stroke() : context.fill();
+      // context.fillStyle = record;
+
+      if (this.stroked) {
+        let record = context.strokeStyle;
+        context.strokeStyle = this.color;
+        context.stroke();
+        context.strokeStyle = record;
+      } else {
+        let record = context.fillStyle;
+        context.fillStyle = this.color;
+        context.fill();
+        context.fillStyle = record;
+      }
       return this;
     }
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
@@ -127,35 +198,50 @@ export namespace Shape {
 
   export interface IRectangle extends ISize, IVector {
     color?: string | CanvasPattern | CanvasGradient;
+    stroked?: boolean;
   }
 
   export class Rectangle extends ApparatusObject<Rectangle> {
     rotation: number;
     size: Size;
+    stroked: boolean;
     constructor(options: IRectangle) {
       super();
       this.size = new Size(options);
       this.position = new Vector(options);
       this.color = options.color || "#222222";
+      this.stroked = options.stroked || false;
       this.rotation = 0;
     }
     draw(context: CanvasRenderingContext2D): Rectangle {
-      let record = context.fillStyle;
-
       context.translate(
         this.position.x + this.size.width / 2,
         this.position.y + this.size.height / 2
       );
 
       context.rotate((this.rotation * Math.PI) / 180);
-      context.fillStyle = this.color;
-      context.fillRect(
-        -this.size.width / 2,
-        -this.size.height / 2,
-        this.size.width,
-        this.size.height
-      );
-      context.fillStyle = record;
+
+      if (this.stroked) {
+        let record = context.strokeStyle;
+        context.strokeStyle = this.color;
+        context.strokeRect(
+          -this.size.width / 2,
+          -this.size.height / 2,
+          this.size.width,
+          this.size.height
+        );
+        context.strokeStyle = record;
+      } else {
+        let record = context.fillStyle;
+        context.fillStyle = this.color;
+        context.fillRect(
+          -this.size.width / 2,
+          -this.size.height / 2,
+          this.size.width,
+          this.size.height
+        );
+        context.fillStyle = record;
+      }
       context.rotate((-this.rotation * Math.PI) / 180);
 
       context.translate(

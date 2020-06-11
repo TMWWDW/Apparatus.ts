@@ -44,14 +44,15 @@ export class ApparatusObject<T> {
   position: Vector;
   color: string | CanvasPattern | CanvasGradient;
   constructor() {}
-  draw(context: CanvasRenderingContext2D): T {
+  draw(_context: CanvasRenderingContext2D): T {
     return (this as unknown) as T;
   }
   add(scene: Scene): T {
     scene.add((this as unknown) as ApparatusObject<TShape>);
     return (this as unknown) as T;
   }
-  getCenterPosition(context: CanvasRenderingContext2D): Vector {
+  getCenterPosition(_context: CanvasRenderingContext2D): Vector {
+    console.warn("It seems that this shape's center position algorithm has not been implemented yet. This method will return an undefined equivalent of vector type. It is not recommended to be used.")
     return new Vector({ x: undefined, y: undefined });
   }
 }
