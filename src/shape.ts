@@ -55,7 +55,6 @@ export namespace Shape {
   }
 
   export class Line extends ApparatusObject<Line> {
-    rotation: number;
     length: number;
     endposition: Vector;
     constructor(options: ILine) {
@@ -86,10 +85,6 @@ export namespace Shape {
       context.strokeStyle = record;
       return this;
     }
-    rotate(angle: number): Line {
-      this.rotation = angle;
-      return this;
-    }
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
       return this.position.diffrence(this.endposition).divide(2).map(Math.abs);
     }
@@ -107,7 +102,6 @@ export namespace Shape {
   export class Triangle extends ApparatusObject<Triangle> {
     points: Vector[];
     stroked: boolean;
-    rotation: number;
     constructor(options: ITriangle) {
       super();
       this.position = new Vector(options.a);
@@ -143,10 +137,6 @@ export namespace Shape {
       }
       return this;
     }
-    rotate(angle: number): Triangle {
-      this.rotation = angle;
-      return this;
-    }
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
       let x = (this.points[0].x + this.points[1].x + this.points[2].x) / 3;
       let y = (this.points[0].y + this.points[1].y + this.points[2].y) / 3;
@@ -171,12 +161,13 @@ export namespace Shape {
       this.stroked = options.stroked || false;
     }
     draw(context: CanvasRenderingContext2D): Circle {
-      // let record = context.fillStyle;
       context.fillStyle = this.color;
       context.beginPath();
+
+      context.translate(this.position.x, this.position.y);
+      context.rotate((this.rotation * Math.PI) / 180);
+      context.translate(-this.position.x, -this.position.y);
       context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-      // this.stroked ? context.stroke() : context.fill();
-      // context.fillStyle = record;
 
       if (this.stroked) {
         let record = context.strokeStyle;
@@ -189,10 +180,64 @@ export namespace Shape {
         context.fill();
         context.fillStyle = record;
       }
+      context.translate(this.position.x, this.position.y);
+      context.rotate((-this.rotation * Math.PI) / 180);
+      context.translate(-this.position.x, -this.position.y);
+
       return this;
     }
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return new Vector(this.position);
+      return this.position;
+    }
+  }
+
+  export interface IPentagon extends IVector {
+    radius: number;
+    rotation?: number;
+    color?: string | CanvasPattern | CanvasGradient;
+    stroked?: boolean;
+  }
+
+  export class Pentagon extends ApparatusObject<Pentagon> {
+    radius: number;
+    stroked: boolean;
+    constructor(options: IPentagon) {
+      super();
+      this.position = new Vector(options);
+      this.radius = options.radius;
+      this.rotation = options.rotation;
+      this.color = options.color || "#222222";
+      this.stroked = options.stroked || false;
+    }
+    draw(context: CanvasRenderingContext2D): Pentagon {
+      let angle = (2 * Math.PI) / 5;
+      context.beginPath();
+      context.translate(this.position.x, this.position.y);
+      context.rotate((this.rotation * Math.PI) / 180);
+
+      context.moveTo(this.radius * Math.cos(0), this.radius * Math.sin(0));
+      for (let i = 1; i <= 5; i++) {
+        context.lineTo(this.radius * Math.cos(i * angle), this.radius * Math.sin(i * angle));
+      }
+      context.rotate((-this.rotation * Math.PI) / 180);
+      context.translate(-this.position.x, -this.position.y);
+
+      if (this.stroked) {
+        let record = context.strokeStyle;
+        context.strokeStyle = this.color;
+        context.stroke();
+        context.strokeStyle = record;
+      } else {
+        let record = context.fillStyle;
+        context.fillStyle = this.color;
+        context.fill();
+        context.fillStyle = record;
+      }
+      context.stroke();
+      return this;
+    }
+    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
+      return this.position;
     }
   }
 
@@ -202,7 +247,6 @@ export namespace Shape {
   }
 
   export class Rectangle extends ApparatusObject<Rectangle> {
-    rotation: number;
     size: Size;
     stroked: boolean;
     constructor(options: IRectangle) {
@@ -211,7 +255,6 @@ export namespace Shape {
       this.position = new Vector(options);
       this.color = options.color || "#222222";
       this.stroked = options.stroked || false;
-      this.rotation = 0;
     }
     draw(context: CanvasRenderingContext2D): Rectangle {
       context.translate(
@@ -249,10 +292,6 @@ export namespace Shape {
         -this.position.y - this.size.height / 2
       );
 
-      return this;
-    }
-    rotate(angle: number): Rectangle {
-      this.rotation = angle;
       return this;
     }
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {

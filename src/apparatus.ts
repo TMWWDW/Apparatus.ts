@@ -2,12 +2,15 @@ import { Size, ISize } from "./size";
 import { Vector } from "./vector";
 import { Shape } from "./shape";
 
-export type TShape = Shape.Rectangle | Shape.Line | Shape.Text;
+export type TShape = Shape.Rectangle | Shape.Circle | Shape.Triangle | Shape.Line | Shape.Text;
 
 export default class Scene {
   context: CanvasRenderingContext2D;
-  objects: Array<ApparatusObject<TShape>>;
+  objects: ApparatusObject<TShape>[];
   constructor(public canvas: HTMLCanvasElement, size?: ISize | Size) {
+    if (!this.canvas) {
+      console.error("Given source element is not present inside the current page.");
+    }
     this.context = canvas.getContext("2d");
     this.canvas.width = size?.width || window.innerWidth;
     this.canvas.height = size?.height || window.innerHeight;
@@ -43,7 +46,10 @@ export default class Scene {
 export class ApparatusObject<T> {
   position: Vector;
   color: string | CanvasPattern | CanvasGradient;
-  constructor() {}
+  rotation: number;
+  constructor() {
+    this.rotation = 0;
+  }
   draw(_context: CanvasRenderingContext2D): T {
     return (this as unknown) as T;
   }
@@ -52,8 +58,14 @@ export class ApparatusObject<T> {
     return (this as unknown) as T;
   }
   getCenterPosition(_context: CanvasRenderingContext2D): Vector {
-    console.warn("It seems that this shape's center position algorithm has not been implemented yet. This method will return an undefined equivalent of vector type. It is not recommended to be used.")
+    console.warn(
+      "It seems that this shape's center position algorithm has not been implemented yet. This method will return an undefined equivalent of vector type. It is not recommended to be used."
+    );
     return new Vector({ x: undefined, y: undefined });
+  }
+  rotate(angle: number): ApparatusObject<T> {
+    this.rotation = angle;
+    return this;
   }
 }
 
