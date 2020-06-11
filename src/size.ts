@@ -29,4 +29,7 @@ export class Size {
   difference(size: Size | ISize): Size {
     return new Size({ width: this.width - size.width, height: this.height - this.height });
   }
+  map(callbackfn: (point: number) => any): Size {
+    return new Size({ width: callbackfn(this.width), height: callbackfn(this.height) });
+  }
 }

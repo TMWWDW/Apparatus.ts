@@ -12,24 +12,44 @@ export class Vector {
     this.y = vector.y;
   }
 
-  add(vector: Vector | IVector): Vector {
-    this.x += vector.x;
-    this.y += vector.y;
+  add(vector: Vector | IVector | number): Vector {
+    if (typeof vector === "number") {
+      this.x += vector;
+      this.y += vector;
+    } else {
+      this.x += vector.x;
+      this.y += vector.y;
+    }
     return this;
   }
-  subtract(vector: Vector | IVector): Vector {
-    this.x -= vector.x;
-    this.y -= vector.y;
+  subtract(vector: Vector | IVector | number): Vector {
+    if (typeof vector === "number") {
+      this.x -= vector;
+      this.y -= vector;
+    } else {
+      this.x -= vector.x;
+      this.y -= vector.y;
+    }
     return this;
   }
-  multiply(vector: Vector | IVector): Vector {
-    this.x *= vector.x;
-    this.y *= vector.y;
+  multiply(vector: Vector | IVector | number): Vector {
+    if (typeof vector === "number") {
+      this.x *= vector;
+      this.y *= vector;
+    } else {
+      this.x *= vector.x;
+      this.y *= vector.y;
+    }
     return this;
   }
-  divide(vector: Vector | IVector): Vector {
-    this.x /= vector.x;
-    this.y /= vector.y;
+  divide(vector: Vector | IVector | number): Vector {
+    if (typeof vector === "number") {
+      this.x /= vector;
+      this.y /= vector;
+    } else {
+      this.x /= vector.x;
+      this.y /= vector.y;
+    }
     return this;
   }
   diffrence(vector: Vector | IVector): Vector {
@@ -44,5 +64,8 @@ export class Vector {
     diff.y = Math.abs(diff.y);
     diff.multiply({ x: diff.x, y: diff.y });
     return Math.sqrt(diff.x + diff.y);
+  }
+  map(callbackfn: (point: number) => any): Vector {
+    return new Vector({ x: callbackfn(this.x), y: callbackfn(this.y) });
   }
 }

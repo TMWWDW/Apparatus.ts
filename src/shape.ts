@@ -13,34 +13,37 @@ export namespace Shape {
   export class Text extends ApparatusObject<Text> {
     font: Font;
     stroked: boolean;
-    center: Vector;
     constructor(public content: string, options: IText) {
       super();
       this.position = new Vector(options);
       this.font = options.font instanceof Font ? options.font : new Font(options.font);
       this.stroked = options.stroked || false;
       this.color = options.color || "#222222";
-
-      // let width = context.measureText(this.content).width;
-      // let height = context.measureText("M").width;
-      // this.center = new Vector({ x: width / 2, y: height / 2 });
     }
 
     draw(context: CanvasRenderingContext2D): Text {
       let recordFont = context.font;
-      let recordStyle = context.fillStyle;
       context.font = this.font.create();
-      context.fillStyle = this.color;
 
       if (this.stroked) {
+        let recordStyle = context.strokeStyle;
+        context.strokeStyle = this.color;
         context.strokeText(this.content, this.position.x, this.position.y + this.font.size);
+        context.strokeStyle = recordStyle;
       } else {
+        let recordStyle = context.fillStyle;
+        context.fillStyle = this.color;
         context.fillText(this.content, this.position.x, this.position.y + this.font.size);
+        context.fillStyle = recordStyle;
       }
-      context.fillStyle = recordStyle;
       context.font = recordFont;
 
       return this;
+    }
+    getCenterPosition(context: CanvasRenderingContext2D): Vector {
+      let width = context.measureText(this.content).width;
+      let height = context.measureText("M").width;
+      return new Vector({ x: width / 2, y: height / 2 });
     }
   }
 
@@ -48,10 +51,10 @@ export namespace Shape {
     start: Vector | IVector;
     end: Vector | IVector;
     color?: string | CanvasPattern | CanvasGradient;
+    rotation?: number;
   }
 
   export class Line extends ApparatusObject<Line> {
-    // TODO: ADD CENTER POINT
     rotation: number;
     length: number;
     endposition: Vector;
@@ -59,24 +62,36 @@ export namespace Shape {
       super();
       this.position = options.start instanceof Vector ? options.start : new Vector(options.start);
       this.endposition = options.end instanceof Vector ? options.end : new Vector(options.end);
+      this.rotation = options.rotation;
       this.length = this.position.distance(this.endposition);
       this.color = options.color || "#222222";
     }
     draw(context: CanvasRenderingContext2D): Line {
       let record = context.strokeStyle;
+      let center = this.getCenterPosition();
+
       context.strokeStyle = this.color;
-      context.rotate((this.rotation * Math.PI) / 180);
+
       context.beginPath();
+      context.translate(center.x, center.y);
+      context.rotate((this.rotation * Math.PI) / 180);
+      context.translate(-center.x, -center.y);
       context.moveTo(this.position.x, this.position.y);
       context.lineTo(this.endposition.x, this.endposition.y);
       context.stroke();
+      context.translate(center.x, center.y);
       context.rotate((-this.rotation * Math.PI) / 180);
+      context.translate(-center.x, -center.y);
+
       context.strokeStyle = record;
       return this;
     }
     rotate(angle: number): Line {
       this.rotation = angle;
       return this;
+    }
+    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
+      return this.position.diffrence(this.endposition).divide(2).map(Math.abs);
     }
   }
 
@@ -88,7 +103,6 @@ export namespace Shape {
 
   export class Circle extends ApparatusObject<Circle> {
     radius: number;
-    center: Vector;
     stroked: boolean;
     constructor(options: ICircle) {
       super();
@@ -117,7 +131,6 @@ export namespace Shape {
 
   export class Rectangle extends ApparatusObject<Rectangle> {
     rotation: number;
-    center: Vector;
     size: Size;
     constructor(options: IRectangle) {
       super();
@@ -125,10 +138,6 @@ export namespace Shape {
       this.position = new Vector(options);
       this.color = options.color || "#222222";
       this.rotation = 0;
-      // this.center = new Vector({
-      //   x: this.position.x + this.size.width / 2,
-      //   y: this.position.y + this.size.height / 2,
-      // });
     }
     draw(context: CanvasRenderingContext2D): Rectangle {
       let record = context.fillStyle;
@@ -159,6 +168,12 @@ export namespace Shape {
     rotate(angle: number): Rectangle {
       this.rotation = angle;
       return this;
+    }
+    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
+      return new Vector({
+        x: this.position.x + this.size.width / 2,
+        y: this.position.y + this.size.height / 2,
+      });
     }
   }
 }
