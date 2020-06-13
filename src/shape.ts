@@ -308,6 +308,9 @@ export namespace Shape {
       }
       return this;
     }
+    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
+      return this.position;
+    }
 
     scale(scale: number): Hexagon {
       this.radius *= scale;
