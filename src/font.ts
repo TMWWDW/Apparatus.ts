@@ -45,6 +45,16 @@ export class Font {
     this.size = size;
     return this;
   }
+
+  static Helvetica = "helvetica";
+  static Arial = "arial";
+  static Gotham = "gotham";
+  static Montserrat = "montserrat";
+  static Quicksand = "quicksand";
+  static Trajan = "trajan";
+  static Garamond = "garamond";
+  static Futura = "futura";
+  static OpenSans = "open-sans";
 }
 
 export type CSSFontStyle = "normal" | "italic" | "oblique" | "initial" | "inherit";

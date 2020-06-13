@@ -45,6 +45,11 @@ export namespace Shape {
       let height = context.measureText("M").width;
       return new Vector({ x: width / 2, y: height / 2 });
     }
+
+    scale(scale: number): Text {
+      this.font.setSize(this.font.size * scale);
+      return this;
+    }
   }
 
   export interface ILine {
@@ -189,6 +194,11 @@ export namespace Shape {
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
       return this.position;
     }
+
+    scale(scale: number): Pentagon {
+      this.radius *= scale;
+      return this;
+    }
   }
 
   export interface IPentagon extends IVector {
@@ -219,6 +229,7 @@ export namespace Shape {
       for (let i = 1; i <= 5; i++) {
         context.lineTo(this.radius * Math.cos(i * angle), this.radius * Math.sin(i * angle));
       }
+
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-this.position.x, -this.position.y);
 
@@ -233,11 +244,74 @@ export namespace Shape {
         context.fill();
         context.fillStyle = record;
       }
-      context.stroke();
       return this;
     }
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
       return this.position;
+    }
+
+    scale(scale: number): Pentagon {
+      this.radius *= scale;
+      return this;
+    }
+  }
+
+  export interface IHexagon extends IVector {
+    radius: number;
+    rotation?: number;
+    color?: string | CanvasPattern | CanvasGradient;
+    stroked?: boolean;
+  }
+
+  export class Hexagon extends ApparatusObject<Hexagon> {
+    stroked?: boolean;
+    radius: number;
+    constructor(options: IHexagon) {
+      super();
+      this.position = new Vector(options);
+      this.radius = options.radius;
+      this.rotation = options.rotation;
+      this.color = options.color || "#222222";
+      this.stroked = options.stroked || false;
+    }
+    draw(context: CanvasRenderingContext2D): Hexagon {
+      context.beginPath();
+
+      context.translate(this.position.x, this.position.y);
+      context.rotate((this.rotation * Math.PI) / 180);
+
+      context.moveTo(
+        this.radius * Math.cos(0),
+        this.radius * Math.sin(0)
+      );
+
+      for (let i = 0; i < 7; i++) {
+        context.lineTo(
+          this.radius * Math.cos((i * 2 * Math.PI) / 6),
+          this.radius * Math.sin((i * 2 * Math.PI) / 6)
+        );
+      }
+
+      context.rotate((-this.rotation * Math.PI) / 180);
+      context.translate(-this.position.x, -this.position.y);
+
+      if (this.stroked) {
+        let record = context.strokeStyle;
+        context.strokeStyle = this.color;
+        context.stroke();
+        context.strokeStyle = record;
+      } else {
+        let record = context.fillStyle;
+        context.fillStyle = this.color;
+        context.fill();
+        context.fillStyle = record;
+      }
+      return this;
+    }
+
+    scale(scale: number): Hexagon {
+      this.radius *= scale;
+      return this;
     }
   }
 
@@ -299,6 +373,16 @@ export namespace Shape {
         x: this.position.x + this.size.width / 2,
         y: this.position.y + this.size.height / 2,
       });
+    }
+
+    scale(scale: number): Rectangle {
+      this.size.scale(scale);
+      return this;
+    }
+
+    resize(size: Size | ISize): Rectangle {
+      this.size = size instanceof Size ? size : new Size(size);
+      return this;
     }
   }
 }
