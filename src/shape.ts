@@ -23,7 +23,9 @@ export namespace Shape {
 
     draw(context: CanvasRenderingContext2D): Text {
       let recordFont = context.font;
+      let recordOpacity = context.globalAlpha;
       context.font = this.font.create();
+      context.globalAlpha = this.opacity;
 
       if (this.stroked) {
         let recordStyle = context.strokeStyle;
@@ -36,6 +38,7 @@ export namespace Shape {
         context.fillText(this.content, this.position.x, this.position.y + this.font.size);
         context.fillStyle = recordStyle;
       }
+      context.globalAlpha = recordOpacity
       context.font = recordFont;
 
       return this;
@@ -72,9 +75,11 @@ export namespace Shape {
     }
     draw(context: CanvasRenderingContext2D): Line {
       let record = context.strokeStyle;
+      let recordOpacity = context.globalAlpha;
       let center = this.getCenterPosition();
 
       context.strokeStyle = this.color;
+      context.globalAlpha = this.opacity;
 
       context.beginPath();
       context.translate(center.x, center.y);
@@ -87,6 +92,7 @@ export namespace Shape {
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-center.x, -center.y);
 
+      context.globalAlpha = recordOpacity
       context.strokeStyle = record;
       return this;
     }
@@ -109,6 +115,7 @@ export namespace Shape {
       this.position = this.polygon.position;
       this.rotation = this.polygon.rotation;
       this.color = this.polygon.color;
+      this.opacity = this.polygon.opacity;
     }
     draw(context: CanvasRenderingContext2D): Triangle {
       this.polygon.draw(context);
@@ -134,6 +141,7 @@ export namespace Shape {
       this.position = this.polygon.position;
       this.rotation = this.polygon.rotation;
       this.color = this.polygon.color;
+      this.opacity = this.polygon.opacity;
     }
     draw(context: CanvasRenderingContext2D): Pentagon {
       this.polygon.draw(context);
@@ -158,6 +166,7 @@ export namespace Shape {
       this.position = this.polygon.position;
       this.rotation = this.polygon.rotation;
       this.color = this.polygon.color;
+      this.opacity = this.polygon.opacity;
     }
     draw(context: CanvasRenderingContext2D): Hexagon {
       this.polygon.draw(context);
@@ -182,6 +191,7 @@ export namespace Shape {
       this.position = this.polygon.position;
       this.rotation = this.polygon.rotation;
       this.color = this.polygon.color;
+      this.opacity = this.polygon.opacity;
     }
     draw(context: CanvasRenderingContext2D): Octagon {
       this.polygon.draw(context);
@@ -204,6 +214,7 @@ export namespace Shape {
     stroked?: boolean;
     color?: string | CanvasPattern | CanvasGradient;
     rotation?: number;
+    opacity?: number;
   }
 
   export class Polygon extends ApparatusObject<Polygon> {
@@ -218,9 +229,13 @@ export namespace Shape {
       this.color = options.color || "#222222";
       this.stroked = options.stroked || false;
       this.vertex = options.vertex;
+      this.opacity = options.opacity;
     }
 
     draw(context: CanvasRenderingContext2D): Polygon {
+      let recordOpacity = context.globalAlpha;
+      context.globalAlpha = this.opacity;
+
       context.beginPath();
 
       context.translate(this.position.x, this.position.y);
@@ -249,6 +264,7 @@ export namespace Shape {
         context.fill();
         context.fillStyle = record;
       }
+      context.globalAlpha = recordOpacity;
       return this;
     }
 
@@ -279,7 +295,9 @@ export namespace Shape {
       this.stroked = options.stroked || false;
     }
     draw(context: CanvasRenderingContext2D): Circle {
-      context.fillStyle = this.color;
+      let recordOpacity = context.globalAlpha;
+
+      context.globalAlpha = this.opacity;
       context.beginPath();
 
       context.translate(this.position.x, this.position.y);
@@ -302,6 +320,7 @@ export namespace Shape {
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-this.position.x, -this.position.y);
 
+      context.globalAlpha = recordOpacity
       return this;
     }
 
@@ -331,6 +350,10 @@ export namespace Shape {
       this.stroked = options.stroked || false;
     }
     draw(context: CanvasRenderingContext2D): Rectangle {
+      let recordOpacity = context.globalAlpha;
+
+      context.globalAlpha = this.opacity;
+
       context.translate(
         this.position.x + this.size.width / 2,
         this.position.y + this.size.height / 2
@@ -365,6 +388,7 @@ export namespace Shape {
         -this.position.x - this.size.width / 2,
         -this.position.y - this.size.height / 2
       );
+      context.globalAlpha = recordOpacity
 
       return this;
     }

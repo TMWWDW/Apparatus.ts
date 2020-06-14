@@ -63,7 +63,7 @@ export default class Scene {
       this.objects
         .sort((object, compare) => (object.layer < compare.layer ? -1 : 1))
         .forEach((object) => {
-          object.component.draw(this.context);
+          if (object.visible) object.component.draw(this.context);
         });
 
       requestAnimationFrame(draw);
@@ -73,13 +73,17 @@ export default class Scene {
   }
 }
 
+export type TArrangeMethod = "back" | "backwards" | "front" | "forwards";
+
 export class ApparatusObject<T> {
   position: Vector;
   color: string | CanvasPattern | CanvasGradient;
   rotation: number;
   owners: Scene[];
+  opacity: number;
   constructor() {
     this.rotation = 0;
+    this.opacity = 1;
     this.owners = [];
   }
 
@@ -93,9 +97,9 @@ export class ApparatusObject<T> {
     );
     return new Vector({ x: undefined, y: undefined });
   }
-  scale(scale: number): ApparatusObject<T> {
+  scale(_scale: number): ApparatusObject<T> {
     console.warn(
-      "It seems that this shape's scaling algorithm has not been implemented yet. This method will return an undefined equivalent of vector type. It is not recommended to be used."
+      "It seems that this shape's scaling algorithm has not been implemented yet. This method will return the ApparatusObject<T> instance that the shape extends to."
     );
     return this;
   }
@@ -103,43 +107,68 @@ export class ApparatusObject<T> {
     this.rotation = angle;
     return this;
   }
+  setOpacity(opacity: number): ApparatusObject<T> {
+    this.opacity = opacity;
+    return this;
+  }
 
-  bind(scene: Scene): T {
+  bind(scene: Scene): ApparatusObject<T> {
     this.owners.push(scene);
     scene.add((this as unknown) as ApparatusObject<TShape>);
-    return (this as unknown) as T;
+    return this;
   }
-  unbind(scene: Scene): T {
+  unbind(scene: Scene): ApparatusObject<T> {
     this.owners.splice(this.owners.indexOf(scene), 1);
     scene.remove((this as unknown) as ApparatusObject<TShape>);
-    return (this as unknown) as T;
+    return this;
   }
 
-  sentToBack(scene: Scene): T {
-    let owner = this.owners.find((owner) => owner === scene);
-    owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layer.minimum - 1);
-    return (this as unknown) as T;
+  arrange(method: TArrangeMethod, scene?: Scene): ApparatusObject<T> {
+    let owner = scene ? this.owners.find((owner) => owner === scene) : this.owners[0];
+
+    if (owner) {
+      switch (method) {
+        case "back":
+          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layer.minimum - 1);
+          break;
+        case "backwards":
+          var instance = owner.objects.find(
+            (object) => object.component === ((this as unknown) as ApparatusObject<TShape>)
+          );
+          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, instance.layer - 1);
+          break;
+        case "front":
+          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layer.maximum + 1);
+
+          break;
+        case "forwards":
+          var instance = owner.objects.find(
+            (object) => object.component === ((this as unknown) as ApparatusObject<TShape>)
+          );
+          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, instance.layer + 1);
+          break;
+      }
+    } else {
+      console.error(
+        "Cannot find the specified scene or this shape has not been bound to any scene at all."
+      );
+    }
+    return this;
   }
-  sendBackwards(scene: Scene): T {
-    let owner = this.owners.find((owner) => owner === scene);
-    let instance = owner.objects.find(
-      (object) => object.component === ((this as unknown) as ApparatusObject<TShape>)
-    );
-    owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, instance.layer - 1);
-    return (this as unknown) as T;
-  }
-  bringToFront(scene: Scene): T {
-    let owner = this.owners.find((owner) => owner === scene);
-    owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layer.maximum + 1);
-    return (this as unknown) as T;
-  }
-  bringForwards(scene: Scene): T {
-    let owner = this.owners.find((owner) => owner === scene);
-    let instance = owner.objects.find(
-      (object) => object.component === ((this as unknown) as ApparatusObject<TShape>)
-    );
-    owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, instance.layer + 1);
-    return (this as unknown) as T;
+
+  setVisibility(visibility: boolean, scene?: Scene): ApparatusObject<T> {
+    let owner = scene ? this.owners.find((owner) => owner === scene) : this.owners[0];
+    if (owner) {
+      let instance = owner.objects.find(
+        (object) => object.component === ((this as unknown) as ApparatusObject<TShape>)
+      );
+      instance.visible = visibility;
+    } else {
+      console.error(
+        "Cannot find the specified scene or this shape has not been bound to any scene at all."
+      );
+    }
+    return this;
   }
 }
 
