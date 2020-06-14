@@ -1,12 +1,11 @@
-import { ApparatusObject, TImage } from "./apparatus";
+import { ApparatusObject, TImage, IApparatusObject } from "./apparatus";
 import { Vector, IVector } from "./vector";
 import { Size, ISize } from "./size";
 import { Font, IFont } from "./font";
 
 export namespace Shape {
-  export interface IImage extends IVector, ISize {
+  export interface IImage extends IVector, ISize, IApparatusObject {
     image: TImage;
-    opacity?: number;
   }
 
   export class Image extends ApparatusObject<Image> {
@@ -63,7 +62,7 @@ export namespace Shape {
       this.source.size = new Size({ width: end.x, height: end.y });
       return this;
     }
-    
+
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
       return new Vector({
         x: this.position.x + this.size.width / 2,
@@ -82,10 +81,9 @@ export namespace Shape {
     }
   }
 
-  export interface IText extends IVector {
+  export interface IText extends IVector, IApparatusObject {
     font: Font | IFont;
     stroked?: boolean;
-    color?: string | CanvasPattern | CanvasGradient;
   }
 
   export class Text extends ApparatusObject<Text> {
@@ -133,11 +131,9 @@ export namespace Shape {
     }
   }
 
-  export interface ILine {
+  export interface ILine extends IApparatusObject {
     start: Vector | IVector;
     end: Vector | IVector;
-    color?: string | CanvasPattern | CanvasGradient;
-    rotation?: number;
   }
 
   export class Line extends ApparatusObject<Line> {
@@ -286,13 +282,10 @@ export namespace Shape {
     }
   }
 
-  export interface IPolygon extends IVector {
+  export interface IPolygon extends IVector, IApparatusObject {
     radius: number;
     vertex: number;
     stroked?: boolean;
-    color?: string | CanvasPattern | CanvasGradient;
-    rotation?: number;
-    opacity?: number;
   }
 
   export class Polygon extends ApparatusObject<Polygon> {
@@ -356,10 +349,9 @@ export namespace Shape {
     }
   }
 
-  export interface ICircle extends IVector {
+  export interface ICircle extends IVector, IApparatusObject {
     radius: number;
     stroked?: boolean;
-    color?: string | CanvasPattern | CanvasGradient;
   }
 
   export class Circle extends ApparatusObject<Circle> {
@@ -412,8 +404,7 @@ export namespace Shape {
     }
   }
 
-  export interface IRectangle extends ISize, IVector {
-    color?: string | CanvasPattern | CanvasGradient;
+  export interface IRectangle extends ISize, IVector, IApparatusObject {
     stroked?: boolean;
   }
 

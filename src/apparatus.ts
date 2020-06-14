@@ -76,6 +76,12 @@ export default class Scene {
 export type TImage =  HTMLImageElement | SVGImageElement | HTMLVideoElement | HTMLCanvasElement;
 export type TArrangeMethod = "back" | "backwards" | "front" | "forwards";
 
+export interface IApparatusObject {
+  color?: string | CanvasPattern | CanvasGradient;
+  rotation?: number;
+  opacity?: number;
+}
+
 export class ApparatusObject<T> {
   position: Vector;
   color: string | CanvasPattern | CanvasGradient;
