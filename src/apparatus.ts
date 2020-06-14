@@ -27,7 +27,7 @@ export default class Scene {
 
   constructor(public canvas: HTMLCanvasElement, size?: ISize | Size) {
     if (!this.canvas) {
-      console.error("Given source element is not present inside the current page.");
+      throw new Error("Given source element is not present inside the current page.");
     }
     this.context = canvas.getContext("2d");
     this.canvas.width = size?.width || window.innerWidth;
@@ -73,6 +73,7 @@ export default class Scene {
   }
 }
 
+export type TImage =  HTMLImageElement | SVGImageElement | HTMLVideoElement | HTMLCanvasElement;
 export type TArrangeMethod = "back" | "backwards" | "front" | "forwards";
 
 export class ApparatusObject<T> {
@@ -84,6 +85,7 @@ export class ApparatusObject<T> {
   constructor() {
     this.rotation = 0;
     this.opacity = 1;
+    this.color = "red";
     this.owners = [];
   }
 
@@ -97,33 +99,33 @@ export class ApparatusObject<T> {
     );
     return new Vector({ x: undefined, y: undefined });
   }
-  scale(_scale: number): ApparatusObject<T> {
+  scale(_scale: number): T {
     console.warn(
       "It seems that this shape's scaling algorithm has not been implemented yet. This method will return the ApparatusObject<T> instance that the shape extends to."
     );
-    return this;
+    return (this as unknown) as T;
   }
-  rotate(angle: number): ApparatusObject<T> {
+  rotate(angle: number): T {
     this.rotation = angle;
-    return this;
+    return (this as unknown) as T;
   }
-  setOpacity(opacity: number): ApparatusObject<T> {
+  setOpacity(opacity: number): T {
     this.opacity = opacity;
-    return this;
+    return (this as unknown) as T;
   }
 
-  bind(scene: Scene): ApparatusObject<T> {
+  bind(scene: Scene): T {
     this.owners.push(scene);
     scene.add((this as unknown) as ApparatusObject<TShape>);
-    return this;
+    return (this as unknown) as T;
   }
-  unbind(scene: Scene): ApparatusObject<T> {
+  unbind(scene: Scene): T {
     this.owners.splice(this.owners.indexOf(scene), 1);
     scene.remove((this as unknown) as ApparatusObject<TShape>);
-    return this;
+    return (this as unknown) as T;
   }
 
-  arrange(method: TArrangeMethod, scene?: Scene): ApparatusObject<T> {
+  arrange(method: TArrangeMethod, scene?: Scene): T {
     let owner = scene ? this.owners.find((owner) => owner === scene) : this.owners[0];
 
     if (owner) {
@@ -149,14 +151,14 @@ export class ApparatusObject<T> {
           break;
       }
     } else {
-      console.error(
+      throw new Error(
         "Cannot find the specified scene or this shape has not been bound to any scene at all."
       );
     }
-    return this;
+    return (this as unknown) as T;
   }
 
-  setVisibility(visibility: boolean, scene?: Scene): ApparatusObject<T> {
+  setVisibility(visibility: boolean, scene?: Scene): T {
     let owner = scene ? this.owners.find((owner) => owner === scene) : this.owners[0];
     if (owner) {
       let instance = owner.objects.find(
@@ -164,11 +166,11 @@ export class ApparatusObject<T> {
       );
       instance.visible = visibility;
     } else {
-      console.error(
+      throw new Error(
         "Cannot find the specified scene or this shape has not been bound to any scene at all."
       );
     }
-    return this;
+    return (this as unknown) as T;
   }
 }
 

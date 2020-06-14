@@ -1,9 +1,87 @@
-import { ApparatusObject } from "./apparatus";
+import { ApparatusObject, TImage } from "./apparatus";
 import { Vector, IVector } from "./vector";
 import { Size, ISize } from "./size";
 import { Font, IFont } from "./font";
 
 export namespace Shape {
+  export interface IImage extends IVector, ISize {
+    image: TImage;
+    opacity?: number;
+  }
+
+  export class Image extends ApparatusObject<Image> {
+    image: TImage;
+    size: Size;
+    source: { position: Vector; size: Size };
+    constructor(options: IImage) {
+      super();
+      this.image = options.image;
+      this.position = new Vector(options);
+      this.source = {
+        position: new Vector({ x: 0, y: 0 }),
+        size: new Size({
+          width: this.image.width as number,
+          height: this.image.height as number,
+        }),
+      };
+      this.size = new Size(options);
+      this.opacity = options.opacity;
+    }
+
+    draw(context: CanvasRenderingContext2D): Image {
+      let recordOpacity = context.globalAlpha;
+
+      context.globalAlpha = this.opacity;
+      context.translate(
+        this.position.x + this.size.width / 2,
+        this.position.y + this.size.height / 2
+      );
+      context.rotate((this.rotation * Math.PI) / 180);
+      context.drawImage(
+        this.image,
+        this.source.position.x,
+        this.source.position.y,
+        this.source.size.width,
+        this.source.size.height,
+        -this.size.width / 2,
+        -this.size.height / 2,
+        this.size.width,
+        this.size.height
+      );
+      context.rotate((-this.rotation * Math.PI) / 180);
+
+      context.translate(
+        -this.position.x - this.size.width / 2,
+        -this.position.y - this.size.height / 2
+      );
+      context.globalAlpha = recordOpacity;
+      return this;
+    }
+
+    setBackgroundSize(start: Vector | IVector, end: Vector | IVector): Image {
+      this.source.position = start instanceof Vector ? start : new Vector(start);
+      this.source.size = new Size({ width: end.x, height: end.y });
+      return this;
+    }
+    
+    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
+      return new Vector({
+        x: this.position.x + this.size.width / 2,
+        y: this.position.y + this.size.height / 2,
+      });
+    }
+
+    scale(scale: number): Image {
+      this.size.scale(scale);
+      return this;
+    }
+
+    resize(size: Size | ISize): Image {
+      this.size = size instanceof Size ? size : new Size(size);
+      return this;
+    }
+  }
+
   export interface IText extends IVector {
     font: Font | IFont;
     stroked?: boolean;
@@ -18,7 +96,7 @@ export namespace Shape {
       this.position = new Vector(options);
       this.font = options.font instanceof Font ? options.font : new Font(options.font);
       this.stroked = options.stroked || false;
-      this.color = options.color || "#222222";
+      if (options.color) this.color = options.color;
     }
 
     draw(context: CanvasRenderingContext2D): Text {
@@ -38,7 +116,7 @@ export namespace Shape {
         context.fillText(this.content, this.position.x, this.position.y + this.font.size);
         context.fillStyle = recordStyle;
       }
-      context.globalAlpha = recordOpacity
+      context.globalAlpha = recordOpacity;
       context.font = recordFont;
 
       return this;
@@ -71,7 +149,7 @@ export namespace Shape {
       this.endposition = options.end instanceof Vector ? options.end : new Vector(options.end);
       this.rotation = options.rotation;
       this.length = this.position.distance(this.endposition);
-      this.color = options.color || "#222222";
+      if (options.color) this.color = options.color;
     }
     draw(context: CanvasRenderingContext2D): Line {
       let record = context.strokeStyle;
@@ -92,7 +170,7 @@ export namespace Shape {
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-center.x, -center.y);
 
-      context.globalAlpha = recordOpacity
+      context.globalAlpha = recordOpacity;
       context.strokeStyle = record;
       return this;
     }
@@ -226,7 +304,7 @@ export namespace Shape {
       this.position = new Vector(options);
       this.radius = options.radius;
       this.rotation = options.rotation;
-      this.color = options.color || "#222222";
+      if (options.color) this.color = options.color;
       this.stroked = options.stroked || false;
       this.vertex = options.vertex;
       this.opacity = options.opacity;
@@ -291,7 +369,7 @@ export namespace Shape {
       super();
       this.position = new Vector(options);
       this.radius = options.radius;
-      this.color = options.color || "#222222";
+      if (options.color) this.color = options.color;
       this.stroked = options.stroked || false;
     }
     draw(context: CanvasRenderingContext2D): Circle {
@@ -320,7 +398,7 @@ export namespace Shape {
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-this.position.x, -this.position.y);
 
-      context.globalAlpha = recordOpacity
+      context.globalAlpha = recordOpacity;
       return this;
     }
 
@@ -346,7 +424,7 @@ export namespace Shape {
       super();
       this.size = new Size(options);
       this.position = new Vector(options);
-      this.color = options.color || "#222222";
+      if (options.color) this.color = options.color;
       this.stroked = options.stroked || false;
     }
     draw(context: CanvasRenderingContext2D): Rectangle {
@@ -388,7 +466,7 @@ export namespace Shape {
         -this.position.x - this.size.width / 2,
         -this.position.y - this.size.height / 2
       );
-      context.globalAlpha = recordOpacity
+      context.globalAlpha = recordOpacity;
 
       return this;
     }
