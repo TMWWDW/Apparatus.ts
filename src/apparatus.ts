@@ -7,6 +7,9 @@ export type TShape =
   | Shape.Circle
   | Shape.Triangle
   | Shape.Pentagon
+  | Shape.Hexagon
+  | Shape.Octagon
+  | Shape.Polygon
   | Shape.Line
   | Shape.Text;
 
@@ -89,6 +92,12 @@ export class ApparatusObject<T> {
       "It seems that this shape's center position algorithm has not been implemented yet. This method will return an undefined equivalent of vector type. It is not recommended to be used."
     );
     return new Vector({ x: undefined, y: undefined });
+  }
+  scale(scale: number): ApparatusObject<T> {
+    console.warn(
+      "It seems that this shape's scaling algorithm has not been implemented yet. This method will return an undefined equivalent of vector type. It is not recommended to be used."
+    );
+    return this;
   }
   rotate(angle: number): ApparatusObject<T> {
     this.rotation = angle;

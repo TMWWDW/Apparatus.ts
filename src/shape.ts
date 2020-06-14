@@ -90,44 +90,153 @@ export namespace Shape {
       context.strokeStyle = record;
       return this;
     }
+
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
       return this.position.diffrence(this.endposition).divide(2).map(Math.abs);
     }
+
+    scale(): Line {
+      console.warn("This object is not scalable.");
+      return this;
+    }
   }
 
-  export interface ITriangle {
-    a: IVector;
-    b: IVector;
-    c: IVector;
+  export class Triangle extends ApparatusObject<Triangle> {
+    polygon: Polygon;
+    constructor(options: Omit<IPolygon, "vertex">) {
+      super();
+      this.polygon = new Polygon({ ...options, vertex: 3 });
+      this.position = this.polygon.position;
+      this.rotation = this.polygon.rotation;
+      this.color = this.polygon.color;
+    }
+    draw(context: CanvasRenderingContext2D): Triangle {
+      this.polygon.draw(context);
+      this.polygon.rotate(30);
+      return this;
+    }
+
+    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
+      return this.position;
+    }
+
+    scale(scale: number): Triangle {
+      this.polygon.radius *= scale;
+      return this;
+    }
+  }
+
+  export class Pentagon extends ApparatusObject<Pentagon> {
+    polygon: Polygon;
+    constructor(options: Omit<IPolygon, "vertex">) {
+      super();
+      this.polygon = new Polygon({ ...options, vertex: 5 });
+      this.position = this.polygon.position;
+      this.rotation = this.polygon.rotation;
+      this.color = this.polygon.color;
+    }
+    draw(context: CanvasRenderingContext2D): Pentagon {
+      this.polygon.draw(context);
+      this.polygon.rotate(30);
+      return this;
+    }
+    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
+      return this.position;
+    }
+
+    scale(scale: number): Pentagon {
+      this.polygon.radius *= scale;
+      return this;
+    }
+  }
+
+  export class Hexagon extends ApparatusObject<Hexagon> {
+    polygon: Polygon;
+    constructor(options: Omit<IPolygon, "vertex">) {
+      super();
+      this.polygon = new Polygon({ ...options, vertex: 6 });
+      this.position = this.polygon.position;
+      this.rotation = this.polygon.rotation;
+      this.color = this.polygon.color;
+    }
+    draw(context: CanvasRenderingContext2D): Hexagon {
+      this.polygon.draw(context);
+      this.polygon.rotate(30);
+      return this;
+    }
+    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
+      return this.position;
+    }
+
+    scale(scale: number): Hexagon {
+      this.polygon.radius *= scale;
+      return this;
+    }
+  }
+
+  export class Octagon extends ApparatusObject<Octagon> {
+    polygon: Polygon;
+    constructor(options: Omit<IPolygon, "vertex">) {
+      super();
+      this.polygon = new Polygon({ ...options, vertex: 8 });
+      this.position = this.polygon.position;
+      this.rotation = this.polygon.rotation;
+      this.color = this.polygon.color;
+    }
+    draw(context: CanvasRenderingContext2D): Octagon {
+      this.polygon.draw(context);
+      this.polygon.rotate(30);
+      return this;
+    }
+    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
+      return this.position;
+    }
+
+    scale(scale: number): Octagon {
+      this.polygon.radius *= scale;
+      return this;
+    }
+  }
+
+  export interface IPolygon extends IVector {
+    radius: number;
+    vertex: number;
     stroked?: boolean;
     color?: string | CanvasPattern | CanvasGradient;
     rotation?: number;
   }
 
-  export class Triangle extends ApparatusObject<Triangle> {
-    points: Vector[];
+  export class Polygon extends ApparatusObject<Polygon> {
+    radius: number;
     stroked: boolean;
-    constructor(options: ITriangle) {
+    vertex: number;
+    constructor(options: IPolygon) {
       super();
-      this.position = new Vector(options.a);
-      this.points = [new Vector(options.a), new Vector(options.b), new Vector(options.c)];
+      this.position = new Vector(options);
+      this.radius = options.radius;
+      this.rotation = options.rotation;
       this.color = options.color || "#222222";
       this.stroked = options.stroked || false;
+      this.vertex = options.vertex;
     }
-    draw(context: CanvasRenderingContext2D): Triangle {
-      let center = this.getCenterPosition();
 
+    draw(context: CanvasRenderingContext2D): Polygon {
       context.beginPath();
-      context.translate(center.x, center.y);
+
+      context.translate(this.position.x, this.position.y);
       context.rotate((this.rotation * Math.PI) / 180);
-      context.translate(-center.x, -center.y);
-      context.moveTo(this.points[0].x, this.points[0].y);
-      context.lineTo(this.points[1].x, this.points[1].y);
-      context.lineTo(this.points[2].x, this.points[2].y);
-      context.lineTo(this.points[0].x, this.points[0].y);
-      context.translate(center.x, center.y);
+
+      context.moveTo(this.radius * Math.cos(0), this.radius * Math.sin(0));
+
+      for (let i = 0; i <= this.vertex; i++) {
+        context.lineTo(
+          this.radius * Math.cos((i * 2 * Math.PI) / this.vertex),
+          this.radius * Math.sin((i * 2 * Math.PI) / this.vertex)
+        );
+      }
+
       context.rotate((-this.rotation * Math.PI) / 180);
-      context.translate(-center.x, -center.y);
+      context.translate(-this.position.x, -this.position.y);
 
       if (this.stroked) {
         let record = context.strokeStyle;
@@ -142,10 +251,14 @@ export namespace Shape {
       }
       return this;
     }
+
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      let x = (this.points[0].x + this.points[1].x + this.points[2].x) / 3;
-      let y = (this.points[0].y + this.points[1].y + this.points[2].y) / 3;
-      return new Vector({ x, y });
+      return this.position;
+    }
+
+    scale(scale: number): Polygon {
+      this.radius *= scale;
+      return this;
     }
   }
 
@@ -191,128 +304,12 @@ export namespace Shape {
 
       return this;
     }
+
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
       return this.position;
     }
 
-    scale(scale: number): Pentagon {
-      this.radius *= scale;
-      return this;
-    }
-  }
-
-  export interface IPentagon extends IVector {
-    radius: number;
-    rotation?: number;
-    color?: string | CanvasPattern | CanvasGradient;
-    stroked?: boolean;
-  }
-
-  export class Pentagon extends ApparatusObject<Pentagon> {
-    radius: number;
-    stroked: boolean;
-    constructor(options: IPentagon) {
-      super();
-      this.position = new Vector(options);
-      this.radius = options.radius;
-      this.rotation = options.rotation;
-      this.color = options.color || "#222222";
-      this.stroked = options.stroked || false;
-    }
-    draw(context: CanvasRenderingContext2D): Pentagon {
-      let angle = (2 * Math.PI) / 5;
-      context.beginPath();
-      context.translate(this.position.x, this.position.y);
-      context.rotate((this.rotation * Math.PI) / 180);
-
-      context.moveTo(this.radius * Math.cos(0), this.radius * Math.sin(0));
-      for (let i = 1; i <= 5; i++) {
-        context.lineTo(this.radius * Math.cos(i * angle), this.radius * Math.sin(i * angle));
-      }
-
-      context.rotate((-this.rotation * Math.PI) / 180);
-      context.translate(-this.position.x, -this.position.y);
-
-      if (this.stroked) {
-        let record = context.strokeStyle;
-        context.strokeStyle = this.color;
-        context.stroke();
-        context.strokeStyle = record;
-      } else {
-        let record = context.fillStyle;
-        context.fillStyle = this.color;
-        context.fill();
-        context.fillStyle = record;
-      }
-      return this;
-    }
-    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return this.position;
-    }
-
-    scale(scale: number): Pentagon {
-      this.radius *= scale;
-      return this;
-    }
-  }
-
-  export interface IHexagon extends IVector {
-    radius: number;
-    rotation?: number;
-    color?: string | CanvasPattern | CanvasGradient;
-    stroked?: boolean;
-  }
-
-  export class Hexagon extends ApparatusObject<Hexagon> {
-    stroked?: boolean;
-    radius: number;
-    constructor(options: IHexagon) {
-      super();
-      this.position = new Vector(options);
-      this.radius = options.radius;
-      this.rotation = options.rotation;
-      this.color = options.color || "#222222";
-      this.stroked = options.stroked || false;
-    }
-    draw(context: CanvasRenderingContext2D): Hexagon {
-      context.beginPath();
-
-      context.translate(this.position.x, this.position.y);
-      context.rotate((this.rotation * Math.PI) / 180);
-
-      context.moveTo(
-        this.radius * Math.cos(0),
-        this.radius * Math.sin(0)
-      );
-
-      for (let i = 0; i < 7; i++) {
-        context.lineTo(
-          this.radius * Math.cos((i * 2 * Math.PI) / 6),
-          this.radius * Math.sin((i * 2 * Math.PI) / 6)
-        );
-      }
-
-      context.rotate((-this.rotation * Math.PI) / 180);
-      context.translate(-this.position.x, -this.position.y);
-
-      if (this.stroked) {
-        let record = context.strokeStyle;
-        context.strokeStyle = this.color;
-        context.stroke();
-        context.strokeStyle = record;
-      } else {
-        let record = context.fillStyle;
-        context.fillStyle = this.color;
-        context.fill();
-        context.fillStyle = record;
-      }
-      return this;
-    }
-    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return this.position;
-    }
-
-    scale(scale: number): Hexagon {
+    scale(scale: number): Circle {
       this.radius *= scale;
       return this;
     }
