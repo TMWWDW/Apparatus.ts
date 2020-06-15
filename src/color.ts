@@ -180,6 +180,7 @@ export class Color {
   static Wheat = "wheat";
   static Burlywood = "burlywood";
   static Tan = "tan";
+  static Rebeccapurple = "rebeccapurple";
   static Rosybrown = "rosybrown";
   static Sandybrown = "sandybrown";
   static Goldenrod = "goldenrod";

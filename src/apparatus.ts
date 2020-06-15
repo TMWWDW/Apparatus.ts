@@ -1,6 +1,7 @@
 import { Size, ISize } from "./size";
-import { Vector, IVector } from "./vector";
+import { IVector } from "./vector";
 import { Shape } from "./shape";
+import { ApparatusObject } from "./object";
 
 export type TShape =
   | Shape.Rectangle
@@ -82,117 +83,18 @@ export interface IBorder {
   width?: number;
 }
 
+export interface IShadow extends Partial<IVector> {
+  blur?: number;
+  color?: string;
+}
+
 export interface IApparatusObject {
   color?: string | CanvasPattern | CanvasGradient;
   rotation?: number;
   opacity?: number;
   nofill?: boolean;
   border?: IBorder;
-}
-
-export class ApparatusObject<T> {
-  position: Vector;
-  anchor: Vector;
-  color: string | CanvasPattern | CanvasGradient;
-  rotation: number;
-  owners: Scene[];
-  opacity: number;
-  nofill: boolean;
-  border: IBorder;
-  constructor() {
-    this.rotation = 0;
-    this.opacity = 1;
-    this.color = "#222222";
-    this.owners = [];
-  }
-
-  draw(_context: CanvasRenderingContext2D): T {
-    return (this as unknown) as T;
-  }
-
-  getCenterPosition(_context: CanvasRenderingContext2D): Vector {
-    console.warn(
-      "It seems that this shape's center position algorithm has not been implemented yet. This method will return an undefined equivalent of vector type. It is not recommended to be used."
-    );
-    return new Vector({ x: undefined, y: undefined });
-  }
-  scale(_scale: number): T {
-    console.warn(
-      "It seems that this shape's scaling algorithm has not been implemented yet. This method will return the ApparatusObject<T> instance that the shape extends to."
-    );
-    return (this as unknown) as T;
-  }
-  rotate(angle: number): T {
-    this.rotation = angle;
-    return (this as unknown) as T;
-  }
-  setAnchor(_position: Vector | IVector): T {
-    throw new Error("Method not implemented yet!");
-    // return (this as unknown) as T;
-  }
-  setOpacity(opacity: number): T {
-    this.opacity = opacity;
-    return (this as unknown) as T;
-  }
-
-  bind(scene: Scene): T {
-    this.owners.push(scene);
-    scene.add((this as unknown) as ApparatusObject<TShape>);
-    return (this as unknown) as T;
-  }
-  unbind(scene: Scene): T {
-    this.owners.splice(this.owners.indexOf(scene), 1);
-    scene.remove((this as unknown) as ApparatusObject<TShape>);
-    return (this as unknown) as T;
-  }
-
-  arrange(method: TArrangeMethod, scene?: Scene): T {
-    let owner = scene ? this.owners.find((owner) => owner === scene) : this.owners[0];
-
-    if (owner) {
-      switch (method) {
-        case "back":
-          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layer.minimum - 1);
-          break;
-        case "backwards":
-          var instance = owner.objects.find(
-            (object) => object.component === ((this as unknown) as ApparatusObject<TShape>)
-          );
-          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, instance.layer - 1);
-          break;
-        case "front":
-          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layer.maximum + 1);
-
-          break;
-        case "forwards":
-          var instance = owner.objects.find(
-            (object) => object.component === ((this as unknown) as ApparatusObject<TShape>)
-          );
-          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, instance.layer + 1);
-          break;
-      }
-    } else {
-      throw new Error(
-        "Cannot find the specified scene or this shape has not been bound to any scene at all."
-      );
-    }
-    return (this as unknown) as T;
-  }
-
-  setVisibility(visibility: boolean, scene?: Scene): T {
-    let owner = scene ? this.owners.find((owner) => owner === scene) : this.owners[0];
-    if (owner) {
-      let instance = owner.objects.find(
-        (object) => object.component === ((this as unknown) as ApparatusObject<TShape>)
-      );
-      instance.visible = visibility;
-    } else {
-      throw new Error(
-        "Cannot find the specified scene or this shape has not been bound to any scene at all."
-      );
-    }
-    return (this as unknown) as T;
-  }
+  shadow?: IShadow;
 }
 
 export * from "./color";

@@ -1,7 +1,8 @@
-import { ApparatusObject, TImage, IApparatusObject, IBorder } from "./apparatus";
+import { TImage, IApparatusObject } from "./apparatus";
 import { Vector, IVector } from "./vector";
 import { Size, ISize } from "./size";
 import { Font, IFont } from "./font";
+import { ApparatusObject } from "./object";
 
 export namespace Shape {
   export interface IImage extends IVector, ISize, IApparatusObject {
@@ -28,9 +29,11 @@ export namespace Shape {
     }
 
     draw(context: CanvasRenderingContext2D): Image {
-      let recordOpacity = context.globalAlpha;
+      // let recordOpacity = context.globalAlpha;
 
-      context.globalAlpha = this.opacity;
+      // context.globalAlpha = this.opacity;
+
+      this.setContext(context);
       context.translate(
         this.position.x + this.size.width / 2,
         this.position.y + this.size.height / 2
@@ -53,7 +56,8 @@ export namespace Shape {
         -this.position.x - this.size.width / 2,
         -this.position.y - this.size.height / 2
       );
-      context.globalAlpha = recordOpacity;
+      this.resetContext(context);
+      // context.globalAlpha = recordOpacity;
       return this;
     }
 
@@ -95,46 +99,28 @@ export namespace Shape {
       this.font = options.font instanceof Font ? options.font : new Font(options.font);
       this.stroked = options.stroked || false;
       this.border = options.border;
+      this.shadow = options.shadow;
       this.nofill = options.nofill;
       if (options.color) this.color = options.color;
     }
 
     draw(context: CanvasRenderingContext2D): Text {
-      let recordFont = context.font;
-      let recordOpacity = context.globalAlpha;
-      context.font = this.font.create();
-      context.globalAlpha = this.opacity;
+      this.setContext(context);
 
       if (this.border && !this.stroked) {
         if (this.border) context.setLineDash(this.border.segments || []);
-        this.drawStroke(context);
+        context.strokeText(this.content, this.position.x, this.position.y + this.font.size);
       }
       if (this.stroked) {
-        this.drawStroke(context);
+        context.strokeText(this.content, this.position.x, this.position.y + this.font.size);
       } else {
         if (!this.nofill) {
-          let recordStyle = context.fillStyle;
-          context.fillStyle = this.color;
           context.fillText(this.content, this.position.x, this.position.y + this.font.size);
-          context.fillStyle = recordStyle;
         }
       }
 
-      context.globalAlpha = recordOpacity;
-      context.font = recordFont;
-
+      this.resetContext(context);
       return this;
-    }
-
-    drawStroke(context: CanvasRenderingContext2D): void {
-      let recordStyle = context.strokeStyle;
-      let recordWidth = context.lineWidth;
-
-      context.lineWidth = this.border?.width || 1;
-      if (this.border?.color) context.strokeStyle = this.border.color;
-      context.strokeText(this.content, this.position.x, this.position.y + this.font.size);
-      context.strokeStyle = recordStyle;
-      context.lineWidth = recordWidth;
     }
 
     getCenterPosition(context: CanvasRenderingContext2D): Vector {
@@ -166,12 +152,8 @@ export namespace Shape {
       if (options.color) this.color = options.color;
     }
     draw(context: CanvasRenderingContext2D): Line {
-      let record = context.strokeStyle;
-      let recordOpacity = context.globalAlpha;
       let center = this.getCenterPosition();
-
-      context.strokeStyle = this.color;
-      context.globalAlpha = this.opacity;
+      this.setContext(context);
 
       context.beginPath();
       context.translate(center.x, center.y);
@@ -184,8 +166,7 @@ export namespace Shape {
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-center.x, -center.y);
 
-      context.globalAlpha = recordOpacity;
-      context.strokeStyle = record;
+      this.resetContext(context);
       return this;
     }
 
@@ -315,20 +296,19 @@ export namespace Shape {
       this.position = new Vector(options);
       this.radius = options.radius;
       this.rotation = options.rotation;
-      if (options.color) this.color = options.color;
       this.stroked = options.stroked || false;
       this.vertex = options.vertex;
       this.opacity = options.opacity;
       this.border = options.border;
+      this.shadow = options.shadow;
       this.nofill = options.nofill;
+      if (options.color) this.color = options.color;
     }
 
     draw(context: CanvasRenderingContext2D): Polygon {
-      let recordOpacity = context.globalAlpha;
-      context.globalAlpha = this.opacity;
+      this.setContext(context);
 
       context.beginPath();
-
       context.translate(this.position.x, this.position.y);
       context.rotate((this.rotation * Math.PI) / 180);
 
@@ -346,35 +326,17 @@ export namespace Shape {
 
       if (this.border && !this.stroked) {
         if (this.border) context.setLineDash(this.border.segments || []);
-        this.drawStroke(context);
+        context.stroke();
       }
       if (this.stroked) {
-        this.drawStroke(context);
+        context.stroke();
       } else {
         if (!this.nofill) {
-          let record = context.fillStyle;
-          context.fillStyle = this.color;
           context.fill();
-          context.fillStyle = record;
         }
       }
-      context.globalAlpha = recordOpacity;
+      this.resetContext(context);
       return this;
-    }
-
-    drawStroke(context: CanvasRenderingContext2D): void {
-      let recordWidth = context.lineWidth;
-      let record = context.strokeStyle;
-
-      context.lineWidth = this.border?.width || 1;
-      if (this.border?.color) {
-        context.strokeStyle = this.border.color;
-      } else {
-        context.strokeStyle = this.color;
-      }
-      context.stroke();
-      context.strokeStyle = record;
-      context.lineWidth = recordWidth;
     }
 
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
@@ -402,12 +364,11 @@ export namespace Shape {
       if (options.color) this.color = options.color;
       this.stroked = options.stroked || false;
       this.border = options.border;
+      this.shadow = options.shadow;
       this.nofill = options.nofill;
     }
     draw(context: CanvasRenderingContext2D): Circle {
-      let recordOpacity = context.globalAlpha;
-
-      context.globalAlpha = this.opacity;
+      this.setContext(context);
       context.beginPath();
 
       context.translate(this.position.x, this.position.y);
@@ -417,16 +378,13 @@ export namespace Shape {
 
       if (this.border && !this.stroked) {
         if (this.border) context.setLineDash(this.border.segments || []);
-        this.drawStroke(context);
+        context.stroke();
       }
       if (this.stroked) {
-        this.drawStroke(context);
+        context.stroke();
       } else {
         if (!this.nofill) {
-          let record = context.fillStyle;
-          context.fillStyle = this.color;
           context.fill();
-          context.fillStyle = record;
         }
       }
 
@@ -434,19 +392,8 @@ export namespace Shape {
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-this.position.x, -this.position.y);
 
-      context.globalAlpha = recordOpacity;
+      this.resetContext(context);
       return this;
-    }
-
-    drawStroke(context: CanvasRenderingContext2D): void {
-      let recordWidth = context.lineWidth;
-      let record = context.strokeStyle;
-
-      context.lineWidth = this.border?.width || 1;
-      if (this.border?.color) context.strokeStyle = this.border.color;
-      context.stroke();
-      context.strokeStyle = record;
-      context.lineWidth = recordWidth;
     }
 
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
@@ -466,44 +413,39 @@ export namespace Shape {
   export class Rectangle extends ApparatusObject<Rectangle> {
     size: Size;
     stroked: boolean;
+    radius: number;
     constructor(options: IRectangle) {
       super();
       this.size = new Size(options);
       this.position = new Vector(options);
-      if (options.color) this.color = options.color;
       this.stroked = options.stroked || false;
-      // this.anchor = this.getCenterPosition();
       this.border = options.border;
+      this.shadow = options.shadow;
       this.nofill = options.nofill;
+      // this.anchor = this.getCenterPosition();
+      if (options.color) this.color = options.color;
     }
     draw(context: CanvasRenderingContext2D): Rectangle {
-      let recordOpacity = context.globalAlpha;
-
-      context.globalAlpha = this.opacity;
-
       context.translate(
         this.position.x + this.size.width / 2,
         this.position.y + this.size.height / 2
       );
       context.rotate((this.rotation * Math.PI) / 180);
 
+      this.setContext(context);
+
       if (this.border && !this.stroked) {
         if (this.border) context.setLineDash(this.border.segments || []);
-        this.drawStroke(context);
+        this.outline(context);
+        context.stroke();
       }
       if (this.stroked) {
-        this.drawStroke(context);
+        this.outline(context);
+        context.stroke();
       } else {
         if (!this.nofill) {
-          let record = context.fillStyle;
-          context.fillStyle = this.color;
-          context.fillRect(
-            -this.size.width / 2,
-            -this.size.height / 2,
-            this.size.width,
-            this.size.height
-          );
-          context.fillStyle = record;
+          this.outline(context);
+          context.fill();
         }
       }
 
@@ -512,25 +454,30 @@ export namespace Shape {
         -this.position.x - this.size.width / 2,
         -this.position.y - this.size.height / 2
       );
-      context.globalAlpha = recordOpacity;
 
+      this.resetContext(context);
       return this;
     }
 
-    drawStroke(context: CanvasRenderingContext2D): void {
-      let record = context.strokeStyle;
-      let recordWidth = context.lineWidth;
+    outline(context) {
+      let r = -this.size.width / 2 + this.size.width;
+      let b = -this.size.height / 2 + this.size.height;
 
-      context.lineWidth = this.border?.width || 1;
-      if (this.border?.color) context.strokeStyle = this.border.color;
-      context.strokeRect(
+      context.beginPath();
+      context.moveTo(-this.size.width / 2 + this.radius, -this.size.height / 2);
+      context.lineTo(r - this.radius, -this.size.height / 2);
+      context.quadraticCurveTo(r, -this.size.height / 2, r, -this.size.height / 2 + this.radius);
+      context.lineTo(r, -this.size.height / 2 + this.size.height - this.radius);
+      context.quadraticCurveTo(r, b, r - this.radius, b);
+      context.lineTo(-this.size.width / 2 + this.radius, b);
+      context.quadraticCurveTo(-this.size.width / 2, b, -this.size.width / 2, b - this.radius);
+      context.lineTo(-this.size.width / 2, -this.size.height / 2 + this.radius);
+      context.quadraticCurveTo(
         -this.size.width / 2,
         -this.size.height / 2,
-        this.size.width,
-        this.size.height
+        -this.size.width / 2 + this.radius,
+        -this.size.height / 2
       );
-      context.strokeStyle = record;
-      context.lineWidth = recordWidth;
     }
 
     getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
