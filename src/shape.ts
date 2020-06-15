@@ -102,15 +102,15 @@ export namespace Shape {
     draw(context: CanvasRenderingContext2D): Text {
       this.setContext(context);
 
-      if (this.border && !this.stroked) {
-        if (this.border) context.setLineDash(this.border.segments || []);
-        context.strokeText(this.content, this.position.x, this.position.y + this.font.size);
-      }
       if (this.stroked) {
         context.strokeText(this.content, this.position.x, this.position.y + this.font.size);
       } else {
         if (!this.nofill) {
           context.fillText(this.content, this.position.x, this.position.y + this.font.size);
+        }
+        if (this.border) {
+          context.setLineDash(this.border.segments || []);
+          context.strokeText(this.content, this.position.x, this.position.y + this.font.size);
         }
       }
 
@@ -124,7 +124,7 @@ export namespace Shape {
     }
 
     center(context: CanvasRenderingContext2D): Vector {
-      console.warn("The center point calculation of this text is mostly an approximation.")
+      console.warn("The center point calculation of this text is mostly an approximation.");
       let width = context.measureText(this.content).width;
       let height = context.measureText("M").width;
       return new Vector({ x: width / 2, y: height / 2 });
@@ -253,7 +253,7 @@ export namespace Shape {
     }
     draw(context: CanvasRenderingContext2D): Octagon {
       this.polygon.draw(context);
-      this.polygon.rotate(30);
+      this.polygon.rotate(this.rotation + 30);
       return this;
     }
 
@@ -303,15 +303,19 @@ export namespace Shape {
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-this.position.x, -this.position.y);
 
-      if (this.border && !this.stroked) {
-        if (this.border) context.setLineDash(this.border.segments || []);
-        context.stroke();
-      }
+      // if (this.border && !this.stroked) {
+      //   if (this.border) context.setLineDash(this.border.segments || []);
+      //   context.stroke();
+      // }
       if (this.stroked) {
         context.stroke();
       } else {
         if (!this.nofill) {
           context.fill();
+        }
+        if (this.border) {
+          context.setLineDash(this.border.segments || []);
+          context.stroke();
         }
       }
       this.resetContext(context);
@@ -351,15 +355,19 @@ export namespace Shape {
       context.translate(-this.position.x, -this.position.y);
       context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
 
-      if (this.border && !this.stroked) {
-        if (this.border) context.setLineDash(this.border.segments || []);
-        context.stroke();
-      }
+      // if (this.border && !this.stroked) {
+      //   if (this.border) context.setLineDash(this.border.segments || []);
+      //   context.stroke();
+      // }
       if (this.stroked) {
         context.stroke();
       } else {
         if (!this.nofill) {
           context.fill();
+        }
+        if (this.border) {
+          context.setLineDash(this.border.segments || []);
+          context.stroke();
         }
       }
 
@@ -384,7 +392,6 @@ export namespace Shape {
   export class Rectangle extends ApparatusObject<Rectangle> {
     size: Size;
     stroked: boolean;
-    radius: number;
     constructor(options: IRectangle) {
       super();
       this.size = new Size(options);
@@ -404,20 +411,18 @@ export namespace Shape {
 
       this.setContext(context);
 
-      if (this.border && !this.stroked) {
-        if (this.border) context.setLineDash(this.border.segments || []);
-        this.outline(context);
-        context.stroke();
-      }
+      this.outline(context);
       if (this.stroked) {
-        this.outline(context);
         context.stroke();
       } else {
-        if (!this.nofill) {
-          this.outline(context);
-          context.fill();
+        if (!this.nofill) context.fill();
+        if (this.border && this.border.width) {
+          context.setLineDash(this.border.segments || []);
+          context.stroke();
         }
       }
+
+      this.resetContext(context);
 
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(
@@ -425,27 +430,27 @@ export namespace Shape {
         -this.position.y - this.size.height / 2
       );
 
-      this.resetContext(context);
       return this;
     }
 
     outline(context) {
+      let radius = this.border?.radius || 0;
       let r = -this.size.width / 2 + this.size.width;
       let b = -this.size.height / 2 + this.size.height;
 
       context.beginPath();
-      context.moveTo(-this.size.width / 2 + this.radius, -this.size.height / 2);
-      context.lineTo(r - this.radius, -this.size.height / 2);
-      context.quadraticCurveTo(r, -this.size.height / 2, r, -this.size.height / 2 + this.radius);
-      context.lineTo(r, -this.size.height / 2 + this.size.height - this.radius);
-      context.quadraticCurveTo(r, b, r - this.radius, b);
-      context.lineTo(-this.size.width / 2 + this.radius, b);
-      context.quadraticCurveTo(-this.size.width / 2, b, -this.size.width / 2, b - this.radius);
-      context.lineTo(-this.size.width / 2, -this.size.height / 2 + this.radius);
+      context.moveTo(-this.size.width / 2 + radius, -this.size.height / 2);
+      context.lineTo(r - radius, -this.size.height / 2);
+      context.quadraticCurveTo(r, -this.size.height / 2, r, -this.size.height / 2 + radius);
+      context.lineTo(r, -this.size.height / 2 + this.size.height - radius);
+      context.quadraticCurveTo(r, b, r - radius, b);
+      context.lineTo(-this.size.width / 2 + radius, b);
+      context.quadraticCurveTo(-this.size.width / 2, b, -this.size.width / 2, b - radius);
+      context.lineTo(-this.size.width / 2, -this.size.height / 2 + radius);
       context.quadraticCurveTo(
         -this.size.width / 2,
         -this.size.height / 2,
-        -this.size.width / 2 + this.radius,
+        -this.size.width / 2 + radius,
         -this.size.height / 2
       );
     }
@@ -473,6 +478,52 @@ export namespace Shape {
         x: this.position.x + this.size.width / 2,
         y: this.position.y + this.size.height / 2,
       });
+    }
+  }
+
+  export interface IFree extends IApparatusObject {
+    points: IVector[];
+    stroked?: boolean;
+  }
+
+  export class Free extends ApparatusObject<Free> {
+    points: IVector[];
+    stroked: boolean;
+    constructor(options: IFree) {
+      super();
+      this.points = options.points;
+      this.position = new Vector(this.points[0]);
+      this.stroked = options.stroked || false;
+      this.border = options.border;
+      this.shadow = options.shadow;
+      this.opacity = options.opacity;
+      this.nofill = options.nofill;
+      if (options.color) this.color = options.color;
+    }
+    draw(context: CanvasRenderingContext2D): Free {
+      this.setContext(context);
+
+      context.beginPath();
+      context.moveTo(this.position.x, this.position.y);
+      this.points.forEach((point, i) => {
+        if (i !== 0) {
+          context.lineTo(point.x, point.y);
+        }
+      });
+      context.lineTo(this.position.x, this.position.y);
+      
+      if (this.stroked) {
+        context.stroke();
+      } else {
+        if (!this.nofill) context.fill();
+        if (this.border && this.border.width) {
+          context.setLineDash(this.border.segments || []);
+          context.stroke();
+        }
+      }
+
+      this.resetContext(context);
+      return this;
     }
   }
 }

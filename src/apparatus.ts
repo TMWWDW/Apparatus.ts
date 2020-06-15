@@ -24,7 +24,7 @@ export default class Scene {
   context: CanvasRenderingContext2D;
   objects: ISceneObject[];
 
-  layer: { minimum: number; maximum: number };
+  layers: { minimum: number; maximum: number };
 
   constructor(public canvas: HTMLCanvasElement, size?: ISize | Size) {
     if (!this.canvas) {
@@ -34,14 +34,14 @@ export default class Scene {
     this.canvas.width = size?.width || window.innerWidth;
     this.canvas.height = size?.height || window.innerHeight;
     this.objects = [];
-    this.layer = {
+    this.layers = {
       minimum: 0,
       maximum: 0,
     };
   }
   add(object: ApparatusObject<TShape>): void {
-    this.objects.push({ component: object, layer: this.layer.maximum, visible: true });
-    this.layer.maximum++;
+    this.objects.push({ component: object, layer: this.layers.maximum, visible: true });
+    this.layers.maximum++;
   }
   remove(object: ApparatusObject<TShape>): void {
     let i = this.objects.indexOf(this.objects.find((o) => o.component === object));
@@ -50,10 +50,10 @@ export default class Scene {
 
   arrangeLayer(component: ApparatusObject<TShape>, layer: number): void {
     this.objects.find((o) => o.component === component).layer = layer;
-    if (layer > this.layer.maximum) {
-      this.layer.maximum = layer;
-    } else if (layer < this.layer.minimum) {
-      this.layer.minimum = layer;
+    if (layer > this.layers.maximum) {
+      this.layers.maximum = layer;
+    } else if (layer < this.layers.minimum) {
+      this.layers.minimum = layer;
     }
   }
 
@@ -81,6 +81,7 @@ export interface IBorder {
   segments?: number[];
   color?: string | CanvasPattern | CanvasGradient;
   width?: number;
+  radius?: number;
 }
 
 export interface IShadow extends Partial<IVector> {

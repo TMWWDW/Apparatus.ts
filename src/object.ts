@@ -15,7 +15,7 @@ export class ApparatusObject<T> {
   position: Vector;
   anchor: Vector;
   color: string | CanvasPattern | CanvasGradient;
-  rotation: number;
+	rotation: number;
   owners: Scene[];
   opacity: number;
   nofill: boolean;
@@ -23,7 +23,7 @@ export class ApparatusObject<T> {
   shadow: IShadow;
   constructor() {
     this.rotation = 0;
-    this.opacity = 1;
+		this.opacity = 1;
     this.color = "#222222";
     this.owners = [];
   }
@@ -32,12 +32,6 @@ export class ApparatusObject<T> {
     return (this as unknown) as T;
   }
 
-  // getCenterPosition(_context: CanvasRenderingContext2D): Vector {
-  //   console.warn(
-  //     "It seems that this shape's center position algorithm has not been implemented yet. This method will return an undefined equivalent of vector type. It is not recommended to be used."
-  //   );
-  //   return new Vector({ x: undefined, y: undefined });
-  // }
   scale(_scale: number): T {
     console.warn(
       "It seems that this shape's scaling algorithm has not been implemented yet. This method will return the ApparatusObject<T> instance that the shape extends to."
@@ -50,11 +44,7 @@ export class ApparatusObject<T> {
   }
   setAnchor(_position: Vector | IVector): T {
     throw new Error("Method not implemented yet!");
-  }
-  setOpacity(opacity: number): T {
-    this.opacity = opacity;
-    return (this as unknown) as T;
-  }
+	}
 
   protected setContext(context: CanvasRenderingContext2D): void {
     if (this.shadow) {
@@ -104,7 +94,7 @@ export class ApparatusObject<T> {
     if (owner) {
       switch (method) {
         case "back":
-          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layer.minimum - 1);
+          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layers.minimum - 1);
           break;
         case "backwards":
           var instance = owner.objects.find(
@@ -113,7 +103,7 @@ export class ApparatusObject<T> {
           owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, instance.layer - 1);
           break;
         case "front":
-          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layer.maximum + 1);
+          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layers.maximum + 1);
 
           break;
         case "forwards":
