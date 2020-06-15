@@ -1,5 +1,5 @@
 import { Size, ISize } from "./size";
-import { Vector } from "./vector";
+import { Vector, IVector } from "./vector";
 import { Shape } from "./shape";
 
 export type TShape =
@@ -73,25 +73,36 @@ export default class Scene {
   }
 }
 
-export type TImage =  HTMLImageElement | SVGImageElement | HTMLVideoElement | HTMLCanvasElement;
+export type TImage = HTMLImageElement | SVGImageElement | HTMLVideoElement | HTMLCanvasElement;
 export type TArrangeMethod = "back" | "backwards" | "front" | "forwards";
+
+export interface IBorder {
+  segments?: number[];
+  color?: string | CanvasPattern | CanvasGradient;
+  width?: number;
+}
 
 export interface IApparatusObject {
   color?: string | CanvasPattern | CanvasGradient;
   rotation?: number;
   opacity?: number;
+  nofill?: boolean;
+  border?: IBorder;
 }
 
 export class ApparatusObject<T> {
   position: Vector;
+  anchor: Vector;
   color: string | CanvasPattern | CanvasGradient;
   rotation: number;
   owners: Scene[];
   opacity: number;
+  nofill: boolean;
+  border: IBorder;
   constructor() {
     this.rotation = 0;
     this.opacity = 1;
-    this.color = "red";
+    this.color = "#222222";
     this.owners = [];
   }
 
@@ -114,6 +125,10 @@ export class ApparatusObject<T> {
   rotate(angle: number): T {
     this.rotation = angle;
     return (this as unknown) as T;
+  }
+  setAnchor(_position: Vector | IVector): T {
+    throw new Error("Method not implemented yet!");
+    // return (this as unknown) as T;
   }
   setOpacity(opacity: number): T {
     this.opacity = opacity;

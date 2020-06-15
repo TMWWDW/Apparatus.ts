@@ -59,9 +59,8 @@ export class Vector {
     });
   }
   distance(vector: Vector | IVector): number {
-    let diff = this.diffrence(vector);
-    diff.x = Math.abs(diff.x);
-    diff.y = Math.abs(diff.y);
+    let diff: Vector = this.diffrence(vector);
+    diff = diff.map(Math.abs);
     diff.multiply({ x: diff.x, y: diff.y });
     return Math.sqrt(diff.x + diff.y);
   }
