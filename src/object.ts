@@ -2,6 +2,15 @@ import { Vector, IVector } from "./vector";
 import Scene, { IBorder, IShadow, TShape, TArrangeMethod } from "./apparatus";
 import { Shape } from "./shape";
 
+export interface IApparatusObject {
+  color?: string | CanvasPattern | CanvasGradient;
+  rotation?: number;
+  opacity?: number;
+  nofill?: boolean;
+  border?: IBorder;
+  shadow?: IShadow;
+}
+
 export class ApparatusObject<T> {
   position: Vector;
   anchor: Vector;
@@ -23,12 +32,12 @@ export class ApparatusObject<T> {
     return (this as unknown) as T;
   }
 
-  getCenterPosition(_context: CanvasRenderingContext2D): Vector {
-    console.warn(
-      "It seems that this shape's center position algorithm has not been implemented yet. This method will return an undefined equivalent of vector type. It is not recommended to be used."
-    );
-    return new Vector({ x: undefined, y: undefined });
-  }
+  // getCenterPosition(_context: CanvasRenderingContext2D): Vector {
+  //   console.warn(
+  //     "It seems that this shape's center position algorithm has not been implemented yet. This method will return an undefined equivalent of vector type. It is not recommended to be used."
+  //   );
+  //   return new Vector({ x: undefined, y: undefined });
+  // }
   scale(_scale: number): T {
     console.warn(
       "It seems that this shape's scaling algorithm has not been implemented yet. This method will return the ApparatusObject<T> instance that the shape extends to."
@@ -41,7 +50,6 @@ export class ApparatusObject<T> {
   }
   setAnchor(_position: Vector | IVector): T {
     throw new Error("Method not implemented yet!");
-    // return (this as unknown) as T;
   }
   setOpacity(opacity: number): T {
     this.opacity = opacity;

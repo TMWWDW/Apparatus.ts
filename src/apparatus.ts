@@ -88,17 +88,9 @@ export interface IShadow extends Partial<IVector> {
   color?: string;
 }
 
-export interface IApparatusObject {
-  color?: string | CanvasPattern | CanvasGradient;
-  rotation?: number;
-  opacity?: number;
-  nofill?: boolean;
-  border?: IBorder;
-  shadow?: IShadow;
-}
-
 export * from "./color";
 export * from "./vector";
 export * from "./size";
 export * from "./font";
 export * from "./shape";
+export * from "./object";

@@ -1,8 +1,8 @@
-import { TImage, IApparatusObject } from "./apparatus";
+import { TImage } from "./apparatus";
 import { Vector, IVector } from "./vector";
 import { Size, ISize } from "./size";
 import { Font, IFont } from "./font";
-import { ApparatusObject } from "./object";
+import { ApparatusObject, IApparatusObject } from "./object";
 
 export namespace Shape {
   export interface IImage extends IVector, ISize, IApparatusObject {
@@ -29,10 +29,6 @@ export namespace Shape {
     }
 
     draw(context: CanvasRenderingContext2D): Image {
-      // let recordOpacity = context.globalAlpha;
-
-      // context.globalAlpha = this.opacity;
-
       this.setContext(context);
       context.translate(
         this.position.x + this.size.width / 2,
@@ -57,7 +53,6 @@ export namespace Shape {
         -this.position.y - this.size.height / 2
       );
       this.resetContext(context);
-      // context.globalAlpha = recordOpacity;
       return this;
     }
 
@@ -65,13 +60,6 @@ export namespace Shape {
       this.source.position = start instanceof Vector ? start : new Vector(start);
       this.source.size = new Size({ width: end.x, height: end.y });
       return this;
-    }
-
-    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return new Vector({
-        x: this.position.x + this.size.width / 2,
-        y: this.position.y + this.size.height / 2,
-      });
     }
 
     scale(scale: number): Image {
@@ -82,6 +70,13 @@ export namespace Shape {
     resize(size: Size | ISize): Image {
       this.size = size instanceof Size ? size : new Size(size);
       return this;
+    }
+
+    get center(): Vector {
+      return new Vector({
+        x: this.position.x + this.size.width / 2,
+        y: this.position.y + this.size.height / 2,
+      });
     }
   }
 
@@ -123,15 +118,16 @@ export namespace Shape {
       return this;
     }
 
-    getCenterPosition(context: CanvasRenderingContext2D): Vector {
-      let width = context.measureText(this.content).width;
-      let height = context.measureText("M").width;
-      return new Vector({ x: width / 2, y: height / 2 });
-    }
-
     scale(scale: number): Text {
       this.font.setSize(this.font.size * scale);
       return this;
+    }
+
+    center(context: CanvasRenderingContext2D): Vector {
+      console.warn("The center point calculation of this text is mostly an approximation.")
+      let width = context.measureText(this.content).width;
+      let height = context.measureText("M").width;
+      return new Vector({ x: width / 2, y: height / 2 });
     }
   }
 
@@ -152,7 +148,7 @@ export namespace Shape {
       if (options.color) this.color = options.color;
     }
     draw(context: CanvasRenderingContext2D): Line {
-      let center = this.getCenterPosition();
+      let center = this.center;
       this.setContext(context);
 
       context.beginPath();
@@ -170,13 +166,13 @@ export namespace Shape {
       return this;
     }
 
-    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return this.position.diffrence(this.endposition).divide(2).map(Math.abs);
-    }
-
     scale(): Line {
       console.warn("This object is not scalable.");
       return this;
+    }
+
+    get center(): Vector {
+      return this.position.diffrence(this.endposition).divide(2).map(Math.abs);
     }
   }
 
@@ -194,10 +190,6 @@ export namespace Shape {
       this.polygon.draw(context);
       this.polygon.rotate(30);
       return this;
-    }
-
-    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return this.position;
     }
 
     scale(scale: number): Triangle {
@@ -221,9 +213,6 @@ export namespace Shape {
       this.polygon.rotate(30);
       return this;
     }
-    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return this.position;
-    }
 
     scale(scale: number): Pentagon {
       this.polygon.radius *= scale;
@@ -246,10 +235,6 @@ export namespace Shape {
       this.polygon.rotate(30);
       return this;
     }
-    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return this.position;
-    }
-
     scale(scale: number): Hexagon {
       this.polygon.radius *= scale;
       return this;
@@ -270,9 +255,6 @@ export namespace Shape {
       this.polygon.draw(context);
       this.polygon.rotate(30);
       return this;
-    }
-    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return this.position;
     }
 
     scale(scale: number): Octagon {
@@ -311,16 +293,13 @@ export namespace Shape {
       context.beginPath();
       context.translate(this.position.x, this.position.y);
       context.rotate((this.rotation * Math.PI) / 180);
-
       context.moveTo(this.radius * Math.cos(0), this.radius * Math.sin(0));
-
       for (let i = 0; i <= this.vertex; i++) {
         context.lineTo(
           this.radius * Math.cos((i * 2 * Math.PI) / this.vertex),
           this.radius * Math.sin((i * 2 * Math.PI) / this.vertex)
         );
       }
-
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-this.position.x, -this.position.y);
 
@@ -337,10 +316,6 @@ export namespace Shape {
       }
       this.resetContext(context);
       return this;
-    }
-
-    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return this.position;
     }
 
     scale(scale: number): Polygon {
@@ -396,10 +371,6 @@ export namespace Shape {
       return this;
     }
 
-    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return this.position;
-    }
-
     scale(scale: number): Circle {
       this.radius *= scale;
       return this;
@@ -422,7 +393,6 @@ export namespace Shape {
       this.border = options.border;
       this.shadow = options.shadow;
       this.nofill = options.nofill;
-      // this.anchor = this.getCenterPosition();
       if (options.color) this.color = options.color;
     }
     draw(context: CanvasRenderingContext2D): Rectangle {
@@ -480,13 +450,6 @@ export namespace Shape {
       );
     }
 
-    getCenterPosition(_context?: CanvasRenderingContext2D): Vector {
-      return new Vector({
-        x: this.position.x + this.size.width / 2,
-        y: this.position.y + this.size.height / 2,
-      });
-    }
-
     // setAnchor(position: Vector | IVector): Rectangle {
     //   this.anchor = new Vector({
     //     x: position.x + this.position.x,
@@ -503,6 +466,13 @@ export namespace Shape {
     resize(size: Size | ISize): Rectangle {
       this.size = size instanceof Size ? size : new Size(size);
       return this;
+    }
+
+    get center(): Vector {
+      return new Vector({
+        x: this.position.x + this.size.width / 2,
+        y: this.position.y + this.size.height / 2,
+      });
     }
   }
 }
