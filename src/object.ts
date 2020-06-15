@@ -22,8 +22,6 @@ export class ApparatusObject<T> {
   border: IBorder;
   shadow: IShadow;
   constructor() {
-    this.rotation = 0;
-		this.opacity = 1;
     this.color = "#222222";
     this.owners = [];
   }

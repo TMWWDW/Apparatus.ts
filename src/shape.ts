@@ -273,6 +273,7 @@ export namespace Shape {
     radius: number;
     stroked: boolean;
     vertex: number;
+    // vertices: Vector[];
     constructor(options: IPolygon) {
       super();
       this.position = new Vector(options);
@@ -284,6 +285,7 @@ export namespace Shape {
       this.border = options.border;
       this.shadow = options.shadow;
       this.nofill = options.nofill;
+      // this.vertices = [];
       if (options.color) this.color = options.color;
     }
 
@@ -295,18 +297,16 @@ export namespace Shape {
       context.rotate((this.rotation * Math.PI) / 180);
       context.moveTo(this.radius * Math.cos(0), this.radius * Math.sin(0));
       for (let i = 0; i <= this.vertex; i++) {
-        context.lineTo(
-          this.radius * Math.cos((i * 2 * Math.PI) / this.vertex),
-          this.radius * Math.sin((i * 2 * Math.PI) / this.vertex)
-        );
+        let vertex = new Vector({
+          x: this.radius * Math.cos((i * 2 * Math.PI) / this.vertex),
+          y: this.radius * Math.sin((i * 2 * Math.PI) / this.vertex),
+        });
+        context.lineTo(vertex.x, vertex.y);
+        // this.vertices.push(vertex);
       }
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-this.position.x, -this.position.y);
 
-      // if (this.border && !this.stroked) {
-      //   if (this.border) context.setLineDash(this.border.segments || []);
-      //   context.stroke();
-      // }
       if (this.stroked) {
         context.stroke();
       } else {
@@ -326,6 +326,20 @@ export namespace Shape {
       this.radius *= scale;
       return this;
     }
+
+    getVertices(context: CanvasRenderingContext2D): Vector[] {
+      let result: Vector[] = [];
+      for (let i = 0; i <= this.vertex; i++) {
+        result.push(
+          new Vector({
+            x: this.radius * Math.cos((i * 2 * Math.PI) / this.vertex) + this.position.x,
+            y: this.radius * Math.sin((i * 2 * Math.PI) / this.vertex) + this.position.y,
+          })
+        );
+      }
+      result.pop()
+      return result;
+    }
   }
 
   export interface ICircle extends IVector, IApparatusObject {
@@ -344,6 +358,7 @@ export namespace Shape {
       this.stroked = options.stroked || false;
       this.border = options.border;
       this.shadow = options.shadow;
+      this.opacity = options.opacity;
       this.nofill = options.nofill;
     }
     draw(context: CanvasRenderingContext2D): Circle {
@@ -355,10 +370,6 @@ export namespace Shape {
       context.translate(-this.position.x, -this.position.y);
       context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
 
-      // if (this.border && !this.stroked) {
-      //   if (this.border) context.setLineDash(this.border.segments || []);
-      //   context.stroke();
-      // }
       if (this.stroked) {
         context.stroke();
       } else {
@@ -455,6 +466,7 @@ export namespace Shape {
       );
     }
 
+    // TO BE DONE
     // setAnchor(position: Vector | IVector): Rectangle {
     //   this.anchor = new Vector({
     //     x: position.x + this.position.x,
@@ -482,17 +494,17 @@ export namespace Shape {
   }
 
   export interface IFree extends IApparatusObject {
-    points: IVector[];
+    vertices: IVector[];
     stroked?: boolean;
   }
 
   export class Free extends ApparatusObject<Free> {
-    points: IVector[];
+    vertices: IVector[];
     stroked: boolean;
     constructor(options: IFree) {
       super();
-      this.points = options.points;
-      this.position = new Vector(this.points[0]);
+      this.vertices = options.vertices;
+      this.position = new Vector(this.vertices[0]);
       this.stroked = options.stroked || false;
       this.border = options.border;
       this.shadow = options.shadow;
@@ -505,13 +517,13 @@ export namespace Shape {
 
       context.beginPath();
       context.moveTo(this.position.x, this.position.y);
-      this.points.forEach((point, i) => {
+      this.vertices.forEach((point, i) => {
         if (i !== 0) {
           context.lineTo(point.x, point.y);
         }
       });
       context.lineTo(this.position.x, this.position.y);
-      
+
       if (this.stroked) {
         context.stroke();
       } else {
