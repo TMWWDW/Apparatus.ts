@@ -60,18 +60,21 @@ export default class Scene {
   }
 
   render(): void {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.objects
+      .sort((object, compare) => (object.layer < compare.layer ? -1 : 1))
+      .forEach((object) => {
+        if (object.visible) object.component.draw(this.context);
+      });
+  }
+
+  loop(fps?: number): void {
+    // TODO: Add fps to the calculation.
     let draw = () => {
-      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-      this.objects
-        .sort((object, compare) => (object.layer < compare.layer ? -1 : 1))
-        .forEach((object) => {
-          if (object.visible) object.component.draw(this.context);
-        });
-
+      this.render();
       requestAnimationFrame(draw);
     };
-
     draw();
   }
 }
