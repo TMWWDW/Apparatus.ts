@@ -1,5 +1,5 @@
 import { Vector, IVector } from "./vector";
-import Scene, { IBorder, IShadow, TShape, TArrangeMethod } from "./apparatus";
+import Scene, { IBorder, IShadow, TShape, TArrangeMethod, TImage } from "./apparatus";
 import { Shape } from "./shape";
 
 export interface IApparatusObject {
@@ -9,18 +9,20 @@ export interface IApparatusObject {
   nofill?: boolean;
   border?: IBorder;
   shadow?: IShadow;
+  clip?: Shape.Image;
 }
 
 export class ApparatusObject<T> {
   position: Vector;
   anchor: Vector;
   color: string | CanvasPattern | CanvasGradient;
-	rotation: number;
+  rotation: number;
   owners: Scene[];
   opacity: number;
   nofill: boolean;
   border: IBorder;
   shadow: IShadow;
+  clip: Shape.Image;
   constructor() {
     this.color = "#222222";
     this.owners = [];
@@ -42,9 +44,10 @@ export class ApparatusObject<T> {
   }
   setAnchor(_position: Vector | IVector): T {
     throw new Error("Method not implemented yet!");
-	}
+  }
 
   protected setContext(context: CanvasRenderingContext2D): void {
+    context.save();
     if (this.shadow) {
       context.shadowColor = this.shadow.color || "black";
       context.shadowBlur = this.shadow.blur || 1;
@@ -73,6 +76,7 @@ export class ApparatusObject<T> {
     context.globalAlpha = 1;
     context.lineWidth = 1;
     context.font = "arial";
+    context.restore();
   }
 
   bind(scene: Scene): T {
@@ -92,7 +96,10 @@ export class ApparatusObject<T> {
     if (owner) {
       switch (method) {
         case "back":
-          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layers.minimum - 1);
+          owner.arrangeLayer(
+            (this as unknown) as ApparatusObject<TShape>,
+            owner.layers.minimum - 1
+          );
           break;
         case "backwards":
           var instance = owner.objects.find(
@@ -101,7 +108,10 @@ export class ApparatusObject<T> {
           owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, instance.layer - 1);
           break;
         case "front":
-          owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, owner.layers.maximum + 1);
+          owner.arrangeLayer(
+            (this as unknown) as ApparatusObject<TShape>,
+            owner.layers.maximum + 1
+          );
 
           break;
         case "forwards":

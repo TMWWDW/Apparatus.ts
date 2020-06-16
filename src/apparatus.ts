@@ -4,15 +4,17 @@ import { Shape } from "./shape";
 import { ApparatusObject } from "./object";
 
 export type TShape =
-  | Shape.Rectangle
   | Shape.Circle
-  | Shape.Triangle
-  | Shape.Pentagon
+  | Shape.Free
   | Shape.Hexagon
-  | Shape.Octagon
-  | Shape.Polygon
+  | Shape.Image
   | Shape.Line
-  | Shape.Text;
+  | Shape.Octagon
+  | Shape.Pentagon
+  | Shape.Polygon
+  | Shape.Rectangle
+  | Shape.Text
+  | Shape.Triangle;
 
 export interface ISceneObject {
   component: ApparatusObject<TShape>;

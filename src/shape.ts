@@ -13,6 +13,7 @@ export namespace Shape {
     image: TImage;
     size: Size;
     source: { position: Vector; size: Size };
+    private $clip: Image;
     constructor(options: IImage) {
       super();
       this.image = options.image;
@@ -26,15 +27,27 @@ export namespace Shape {
       };
       this.size = new Size(options);
       this.opacity = options.opacity;
+      this.clip = options.clip;
+
+      // if (this.clip) {
+      //   this.$clip = new Image({
+      //     x: this.clip.position.x - this.clip.size.width / 2,
+      //     y: this.clip.position.y - this.clip.size.height / 2,
+      //     width: this.clip.size.width,
+      //     height: this.clip.size.height,
+      //     ...this.clip,
+      //   });
+      // }
     }
 
     draw(context: CanvasRenderingContext2D): Image {
-      this.setContext(context);
       context.translate(
         this.position.x + this.size.width / 2,
         this.position.y + this.size.height / 2
       );
       context.rotate((this.rotation * Math.PI) / 180);
+
+      this.setContext(context);
       context.drawImage(
         this.image,
         this.source.position.x,
@@ -46,13 +59,22 @@ export namespace Shape {
         this.size.width,
         this.size.height
       );
-      context.rotate((-this.rotation * Math.PI) / 180);
 
+      if (this.$clip) {
+        // TO BE FIXED
+        // context.rect(-this.size.width / 2, this.size.height / 2, this.size.width, this.size.height);
+        // context.clip();
+        // this.$clip.draw(context);
+      }
+
+      this.resetContext(context);
+
+      context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(
         -this.position.x - this.size.width / 2,
         -this.position.y - this.size.height / 2
       );
-      this.resetContext(context);
+
       return this;
     }
 
@@ -96,6 +118,7 @@ export namespace Shape {
       this.border = options.border;
       this.shadow = options.shadow;
       this.nofill = options.nofill;
+      this.clip = options.clip;
       if (options.color) this.color = options.color;
     }
 
@@ -112,6 +135,12 @@ export namespace Shape {
           context.setLineDash(this.border.segments || []);
           context.strokeText(this.content, this.position.x, this.position.y + this.font.size);
         }
+      }
+
+      if (this.clip) {
+        // TO BE FIXED
+        // context.clip();
+        // this.clip.draw(context);
       }
 
       this.resetContext(context);
@@ -273,7 +302,6 @@ export namespace Shape {
     radius: number;
     stroked: boolean;
     vertex: number;
-    // vertices: Vector[];
     constructor(options: IPolygon) {
       super();
       this.position = new Vector(options);
@@ -285,7 +313,7 @@ export namespace Shape {
       this.border = options.border;
       this.shadow = options.shadow;
       this.nofill = options.nofill;
-      // this.vertices = [];
+      this.clip = options.clip;
       if (options.color) this.color = options.color;
     }
 
@@ -302,7 +330,6 @@ export namespace Shape {
           y: this.radius * Math.sin((i * 2 * Math.PI) / this.vertex),
         });
         context.lineTo(vertex.x, vertex.y);
-        // this.vertices.push(vertex);
       }
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-this.position.x, -this.position.y);
@@ -318,6 +345,11 @@ export namespace Shape {
           context.stroke();
         }
       }
+      if (this.clip) {
+        context.clip();
+        this.clip.draw(context);
+      }
+
       this.resetContext(context);
       return this;
     }
@@ -327,7 +359,7 @@ export namespace Shape {
       return this;
     }
 
-    getVertices(context: CanvasRenderingContext2D): Vector[] {
+    getVertices(): Vector[] {
       let result: Vector[] = [];
       for (let i = 0; i <= this.vertex; i++) {
         result.push(
@@ -337,7 +369,7 @@ export namespace Shape {
           })
         );
       }
-      result.pop()
+      result.pop();
       return result;
     }
   }
@@ -360,6 +392,7 @@ export namespace Shape {
       this.shadow = options.shadow;
       this.opacity = options.opacity;
       this.nofill = options.nofill;
+      this.clip = options.clip;
     }
     draw(context: CanvasRenderingContext2D): Circle {
       this.setContext(context);
@@ -380,6 +413,11 @@ export namespace Shape {
           context.setLineDash(this.border.segments || []);
           context.stroke();
         }
+      }
+
+      if (this.clip) {
+        context.clip();
+        this.clip.draw(context);
       }
 
       context.translate(this.position.x, this.position.y);
@@ -403,6 +441,7 @@ export namespace Shape {
   export class Rectangle extends ApparatusObject<Rectangle> {
     size: Size;
     stroked: boolean;
+    private $clip: Image;
     constructor(options: IRectangle) {
       super();
       this.size = new Size(options);
@@ -411,7 +450,18 @@ export namespace Shape {
       this.border = options.border;
       this.shadow = options.shadow;
       this.nofill = options.nofill;
+      this.clip = options.clip;
       if (options.color) this.color = options.color;
+
+      if (this.clip) {
+        this.$clip = new Image({
+          x: this.clip.position.x - this.clip.size.width / 2,
+          y: this.clip.position.y - this.clip.size.height / 2,
+          width: this.clip.size.width,
+          height: this.clip.size.height,
+          ...this.clip,
+        });
+      }
     }
     draw(context: CanvasRenderingContext2D): Rectangle {
       context.translate(
@@ -431,6 +481,11 @@ export namespace Shape {
           context.setLineDash(this.border.segments || []);
           context.stroke();
         }
+      }
+
+      if (this.$clip) {
+        context.clip();
+        this.$clip.draw(context);
       }
 
       this.resetContext(context);
