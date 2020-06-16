@@ -217,7 +217,7 @@ export namespace Shape {
     }
     draw(context: CanvasRenderingContext2D): Triangle {
       this.polygon.draw(context);
-      this.polygon.rotate(30);
+      this.polygon.rotate(this.rotation + 30);
       return this;
     }
 
@@ -239,7 +239,7 @@ export namespace Shape {
     }
     draw(context: CanvasRenderingContext2D): Pentagon {
       this.polygon.draw(context);
-      this.polygon.rotate(30);
+      this.polygon.rotate(this.rotation + 30);
       return this;
     }
 
@@ -261,7 +261,7 @@ export namespace Shape {
     }
     draw(context: CanvasRenderingContext2D): Hexagon {
       this.polygon.draw(context);
-      this.polygon.rotate(30);
+      this.polygon.rotate(this.rotation + 30);
       return this;
     }
     scale(scale: number): Hexagon {

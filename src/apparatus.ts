@@ -1,5 +1,5 @@
 import { Size, ISize } from "./size";
-import { IVector } from "./vector";
+import { IVector, Vector } from "./vector";
 import { Shape } from "./shape";
 import { ApparatusObject } from "./object";
 
@@ -41,6 +41,11 @@ export default class Scene {
       maximum: 0,
     };
   }
+
+  get center(): Vector {
+    return new Vector({ x: this.canvas.width / 2, y: this.canvas.height / 2 });
+  }
+
   add(object: ApparatusObject<TShape>): void {
     this.objects.push({ component: object, layer: this.layers.maximum, visible: true });
     this.layers.maximum++;
