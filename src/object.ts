@@ -23,14 +23,14 @@ export class ApparatusObject<T> {
   border: IBorder;
   shadow: IShadow;
   clip: Shape.Image;
-  constructor(options: IApparatusObject) {
-    this.color = options.color || "#222222";
-    this.rotation = options.rotation || 0;
-    this.opacity = options.opacity || 1;
-    this.nofill = options.nofill || false;
-    this.border = options.border || null;
-    this.shadow = options.shadow || null;
-    this.clip = options.clip || null;
+  constructor(options?: IApparatusObject) {
+    this.color = options?.color || "#222222";
+    this.rotation = options?.rotation || 0;
+    this.opacity = options?.opacity || 1;
+    this.nofill = options?.nofill || false;
+    this.border = options?.border || null;
+    this.shadow = options?.shadow || null;
+    this.clip = options?.clip || null;
     this.owners = [];
   }
 

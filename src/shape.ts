@@ -539,7 +539,7 @@ export namespace Shape {
       context.translate(this.vertices[0].x, this.vertices[0].y);
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-this.vertices[0].x, -this.vertices[0].y);
-      
+
       if (this.stroked) {
         context.stroke();
       } else {
@@ -583,6 +583,43 @@ export namespace Shape {
         this.controls[0].y - this.position.y,
         this.controls[1].x - this.position.x,
         this.controls[1].y - this.position.y,
+        this.endposition.x - this.position.x,
+        this.endposition.y - this.position.y
+      );
+      context.stroke();
+
+      context.rotate((-this.rotation * Math.PI) / 180);
+      context.translate(-this.position.x, -this.position.y);
+
+      this.resetContext(context);
+      return this;
+    }
+  }
+
+  export interface IQuadraticCurve extends IApparatusObject, ILine {
+    control: IVector | Vector
+  }
+
+  export class QuadraticCurve extends ApparatusObject<QuadraticCurve> {
+    control: Vector;
+    endposition: Vector;
+    constructor(options: IQuadraticCurve) {
+      super(options);
+      this.position = options.start instanceof Vector ? options.start : new Vector(options.start);
+      this.endposition = options.end instanceof Vector ? options.end : new Vector(options.end);
+      this.control = options.control instanceof Vector ? options.control : new Vector(options.control)
+    }
+
+    draw(context: CanvasRenderingContext2D): QuadraticCurve {
+      this.setContext(context);
+
+      context.translate(this.position.x, this.position.y);
+      context.rotate((this.rotation * Math.PI) / 180);
+
+      context.moveTo(0, 0);
+      context.quadraticCurveTo(
+        this.control.x - this.position.x,
+        this.control.y - this.position.y,
         this.endposition.x - this.position.x,
         this.endposition.y - this.position.y
       );
