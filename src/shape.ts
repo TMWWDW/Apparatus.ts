@@ -532,8 +532,14 @@ export namespace Shape {
     draw(context: CanvasRenderingContext2D): Free {
       this.setContext(context);
 
+      context.translate(this.vertices[0].x, this.vertices[0].y);
+      context.rotate((this.rotation * Math.PI) / 180);
+      context.translate(-this.vertices[0].x, -this.vertices[0].y);
       ApparatusObject.DrawShape(context, this.border?.radius || 0, this.vertices);
-
+      context.translate(this.vertices[0].x, this.vertices[0].y);
+      context.rotate((-this.rotation * Math.PI) / 180);
+      context.translate(-this.vertices[0].x, -this.vertices[0].y);
+      
       if (this.stroked) {
         context.stroke();
       } else {
@@ -543,6 +549,47 @@ export namespace Shape {
           context.stroke();
         }
       }
+
+      this.resetContext(context);
+      return this;
+    }
+  }
+
+  export interface ICubicCurve extends IApparatusObject, ILine {
+    controls: [IVector | Vector, IVector | Vector];
+  }
+
+  export class CubicCurve extends ApparatusObject<CubicCurve> {
+    controls: Vector[];
+    endposition: Vector;
+    constructor(options: ICubicCurve) {
+      super(options);
+      this.position = options.start instanceof Vector ? options.start : new Vector(options.start);
+      this.endposition = options.end instanceof Vector ? options.end : new Vector(options.end);
+      this.controls = options.controls.map((control) =>
+        control instanceof Vector ? control : new Vector(control)
+      );
+    }
+
+    draw(context: CanvasRenderingContext2D): CubicCurve {
+      this.setContext(context);
+
+      context.translate(this.position.x, this.position.y);
+      context.rotate((this.rotation * Math.PI) / 180);
+
+      context.moveTo(0, 0);
+      context.bezierCurveTo(
+        this.controls[0].x - this.position.x,
+        this.controls[0].y - this.position.y,
+        this.controls[1].x - this.position.x,
+        this.controls[1].y - this.position.y,
+        this.endposition.x - this.position.x,
+        this.endposition.y - this.position.y
+      );
+      context.stroke();
+
+      context.rotate((-this.rotation * Math.PI) / 180);
+      context.translate(-this.position.x, -this.position.y);
 
       this.resetContext(context);
       return this;
