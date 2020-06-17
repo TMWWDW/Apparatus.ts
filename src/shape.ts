@@ -3,6 +3,7 @@ import { Vector, IVector } from "./vector";
 import { Size, ISize } from "./size";
 import { Font, IFont } from "./font";
 import { ApparatusObject, IApparatusObject } from "./object";
+import { Color } from "./color";
 
 export namespace Shape {
   export interface IImage extends IVector, ISize, IApparatusObject {
@@ -15,7 +16,7 @@ export namespace Shape {
     source: { position: Vector; size: Size };
     private $clip: Image;
     constructor(options: IImage) {
-      super();
+      super(options);
       this.image = options.image;
       this.position = new Vector(options);
       this.source = {
@@ -26,8 +27,6 @@ export namespace Shape {
         }),
       };
       this.size = new Size(options);
-      this.opacity = options.opacity;
-      this.clip = options.clip;
 
       // if (this.clip) {
       //   this.$clip = new Image({
@@ -111,15 +110,10 @@ export namespace Shape {
     font: Font;
     stroked: boolean;
     constructor(public content: string, options: IText) {
-      super();
+      super(options);
       this.position = new Vector(options);
       this.font = options.font instanceof Font ? options.font : new Font(options.font);
       this.stroked = options.stroked || false;
-      this.border = options.border;
-      this.shadow = options.shadow;
-      this.nofill = options.nofill;
-      this.clip = options.clip;
-      if (options.color) this.color = options.color;
     }
 
     draw(context: CanvasRenderingContext2D): Text {
@@ -169,12 +163,10 @@ export namespace Shape {
     length: number;
     endposition: Vector;
     constructor(options: ILine) {
-      super();
+      super(options);
       this.position = options.start instanceof Vector ? options.start : new Vector(options.start);
       this.endposition = options.end instanceof Vector ? options.end : new Vector(options.end);
-      this.rotation = options.rotation;
       this.length = this.position.distance(this.endposition);
-      if (options.color) this.color = options.color;
     }
     draw(context: CanvasRenderingContext2D): Line {
       let center = this.center;
@@ -208,7 +200,7 @@ export namespace Shape {
   export class Triangle extends ApparatusObject<Triangle> {
     polygon: Polygon;
     constructor(options: Omit<IPolygon, "vertex">) {
-      super();
+      super(options);
       this.polygon = new Polygon({ ...options, vertex: 3 });
       this.position = this.polygon.position;
       this.rotation = this.polygon.rotation;
@@ -230,7 +222,7 @@ export namespace Shape {
   export class Pentagon extends ApparatusObject<Pentagon> {
     polygon: Polygon;
     constructor(options: Omit<IPolygon, "vertex">) {
-      super();
+      super(options);
       this.polygon = new Polygon({ ...options, vertex: 5 });
       this.position = this.polygon.position;
       this.rotation = this.polygon.rotation;
@@ -252,7 +244,7 @@ export namespace Shape {
   export class Hexagon extends ApparatusObject<Hexagon> {
     polygon: Polygon;
     constructor(options: Omit<IPolygon, "vertex">) {
-      super();
+      super(options);
       this.polygon = new Polygon({ ...options, vertex: 6 });
       this.position = this.polygon.position;
       this.rotation = this.polygon.rotation;
@@ -273,7 +265,7 @@ export namespace Shape {
   export class Octagon extends ApparatusObject<Octagon> {
     polygon: Polygon;
     constructor(options: Omit<IPolygon, "vertex">) {
-      super();
+      super(options);
       this.polygon = new Polygon({ ...options, vertex: 8 });
       this.position = this.polygon.position;
       this.rotation = this.polygon.rotation;
@@ -303,17 +295,11 @@ export namespace Shape {
     stroked: boolean;
     vertex: number;
     constructor(options: IPolygon) {
-      super();
+      super(options);
       this.position = new Vector(options);
       this.radius = options.radius;
-      this.rotation = options.rotation;
       this.stroked = options.stroked || false;
       this.vertex = options.vertex;
-      this.opacity = options.opacity;
-      this.border = options.border;
-      this.shadow = options.shadow;
-      this.nofill = options.nofill;
-      this.clip = options.clip;
       if (options.color) this.color = options.color;
     }
 
@@ -323,14 +309,7 @@ export namespace Shape {
       context.beginPath();
       context.translate(this.position.x, this.position.y);
       context.rotate((this.rotation * Math.PI) / 180);
-      context.moveTo(this.radius * Math.cos(0), this.radius * Math.sin(0));
-      for (let i = 0; i <= this.vertex; i++) {
-        let vertex = new Vector({
-          x: this.radius * Math.cos((i * 2 * Math.PI) / this.vertex),
-          y: this.radius * Math.sin((i * 2 * Math.PI) / this.vertex),
-        });
-        context.lineTo(vertex.x, vertex.y);
-      }
+      ApparatusObject.DrawShape(context, this.border?.radius || 0, this.getVertices());
       context.rotate((-this.rotation * Math.PI) / 180);
       context.translate(-this.position.x, -this.position.y);
 
@@ -340,7 +319,7 @@ export namespace Shape {
         if (!this.nofill) {
           context.fill();
         }
-        if (this.border) {
+        if (this.border?.width) {
           context.setLineDash(this.border.segments || []);
           context.stroke();
         }
@@ -364,8 +343,8 @@ export namespace Shape {
       for (let i = 0; i <= this.vertex; i++) {
         result.push(
           new Vector({
-            x: this.radius * Math.cos((i * 2 * Math.PI) / this.vertex) + this.position.x,
-            y: this.radius * Math.sin((i * 2 * Math.PI) / this.vertex) + this.position.y,
+            x: this.radius * Math.cos((i * 2 * Math.PI) / this.vertex),
+            y: this.radius * Math.sin((i * 2 * Math.PI) / this.vertex),
           })
         );
       }
@@ -383,16 +362,10 @@ export namespace Shape {
     radius: number;
     stroked: boolean;
     constructor(options: ICircle) {
-      super();
+      super(options);
       this.position = new Vector(options);
       this.radius = options.radius;
-      if (options.color) this.color = options.color;
       this.stroked = options.stroked || false;
-      this.border = options.border;
-      this.shadow = options.shadow;
-      this.opacity = options.opacity;
-      this.nofill = options.nofill;
-      this.clip = options.clip;
     }
     draw(context: CanvasRenderingContext2D): Circle {
       this.setContext(context);
@@ -443,15 +416,10 @@ export namespace Shape {
     stroked: boolean;
     private $clip: Image;
     constructor(options: IRectangle) {
-      super();
+      super(options);
       this.size = new Size(options);
       this.position = new Vector(options);
       this.stroked = options.stroked || false;
-      this.border = options.border;
-      this.shadow = options.shadow;
-      this.nofill = options.nofill;
-      this.clip = options.clip;
-      if (options.color) this.color = options.color;
 
       if (this.clip) {
         this.$clip = new Image({
@@ -557,14 +525,10 @@ export namespace Shape {
     vertices: IVector[];
     stroked: boolean;
     constructor(options: IFree) {
-      super();
+      super(options);
       this.vertices = options.vertices;
       this.position = new Vector(this.vertices[0]);
       this.stroked = options.stroked || false;
-      this.border = options.border;
-      this.shadow = options.shadow;
-      this.opacity = options.opacity;
-      this.nofill = options.nofill;
       if (options.color) this.color = options.color;
     }
     draw(context: CanvasRenderingContext2D): Free {
