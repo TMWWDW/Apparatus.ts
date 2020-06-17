@@ -30,7 +30,7 @@ export class Font {
       ? this.lineHeight.toString()
       : this.lineHeight.toString() + "px";
   }
-  create(): string {
+  bundle(): string {
     return `${this.style} ${this.variant} ${this.weight} ${this.Size}/${this.LineHeight} ${this.family}`;
   }
   increment(amount?: number): Font {

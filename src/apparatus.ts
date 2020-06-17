@@ -5,6 +5,7 @@ import { ApparatusObject } from "./object";
 
 export type TShape =
   | Shape.Circle
+  | Shape.CubicCurve
   | Shape.Free
   | Shape.Hexagon
   | Shape.Image
@@ -12,6 +13,7 @@ export type TShape =
   | Shape.Octagon
   | Shape.Pentagon
   | Shape.Polygon
+  | Shape.QuadraticCurve
   | Shape.Rectangle
   | Shape.Text
   | Shape.Triangle;
@@ -99,6 +101,7 @@ export interface IShadow extends Partial<IVector> {
   color?: string;
 }
 
+export * from "./filter";
 export * from "./color";
 export * from "./vector";
 export * from "./size";

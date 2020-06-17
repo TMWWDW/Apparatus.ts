@@ -209,7 +209,7 @@ export namespace Shape {
     }
     draw(context: CanvasRenderingContext2D): Triangle {
       this.polygon.draw(context);
-      this.polygon.rotate(this.rotation + 30);
+      this.polygon.rotate(this.rotation);
       return this;
     }
 
@@ -231,7 +231,7 @@ export namespace Shape {
     }
     draw(context: CanvasRenderingContext2D): Pentagon {
       this.polygon.draw(context);
-      this.polygon.rotate(this.rotation + 30);
+      this.polygon.rotate(this.rotation);
       return this;
     }
 
@@ -253,7 +253,7 @@ export namespace Shape {
     }
     draw(context: CanvasRenderingContext2D): Hexagon {
       this.polygon.draw(context);
-      this.polygon.rotate(this.rotation + 30);
+      this.polygon.rotate(this.rotation);
       return this;
     }
     scale(scale: number): Hexagon {
@@ -274,7 +274,7 @@ export namespace Shape {
     }
     draw(context: CanvasRenderingContext2D): Octagon {
       this.polygon.draw(context);
-      this.polygon.rotate(this.rotation + 30);
+      this.polygon.rotate(this.rotation);
       return this;
     }
 
@@ -306,10 +306,13 @@ export namespace Shape {
     draw(context: CanvasRenderingContext2D): Polygon {
       this.setContext(context);
 
-      context.beginPath();
+      context.translate(this.position.x, this.position.y)
       context.rotate((this.rotation * Math.PI) / 180);
-      ApparatusObject.DrawShape(context, this.border?.radius || 0, this.getVertices());
+      let v = this.getVertices().map(v => new Vector({ x: v.x - this.position.x, y: v.y - this.position.y }))
+      ApparatusObject.DrawShape(context, this.border?.radius || 0, v);
       context.rotate((-this.rotation * Math.PI) / 180);
+      context.translate(-this.position.x, -this.position.y)
+      context.closePath()
 
       if (this.stroked) {
         context.stroke();

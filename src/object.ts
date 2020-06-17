@@ -1,5 +1,5 @@
 import { Vector, IVector } from "./vector";
-import Scene, { IBorder, IShadow, TShape, TArrangeMethod, TImage } from "./apparatus";
+import Scene, { IBorder, IShadow, TShape, TArrangeMethod, TImage, Filter } from "./apparatus";
 import { Shape } from "./shape";
 
 export interface IApparatusObject {
@@ -10,6 +10,7 @@ export interface IApparatusObject {
   border?: IBorder;
   shadow?: IShadow;
   clip?: Shape.Image;
+  filter?: Filter;
 }
 
 export class ApparatusObject<T> {
@@ -23,6 +24,7 @@ export class ApparatusObject<T> {
   border: IBorder;
   shadow: IShadow;
   clip: Shape.Image;
+  filter?: Filter;
   constructor(options?: IApparatusObject) {
     this.color = options?.color || "#222222";
     this.rotation = options?.rotation || 0;
@@ -31,6 +33,7 @@ export class ApparatusObject<T> {
     this.border = options?.border || null;
     this.shadow = options?.shadow || null;
     this.clip = options?.clip || null;
+    this.filter = options?.filter || null;
     this.owners = [];
   }
 
@@ -54,13 +57,15 @@ export class ApparatusObject<T> {
 
   protected setContext(context: CanvasRenderingContext2D): void {
     context.save();
-    context.beginPath()
+    context.beginPath();
     if (this.shadow) {
       context.shadowColor = this.shadow.color || "black";
       context.shadowBlur = this.shadow.blur || 1;
       context.shadowOffsetX = this.shadow.x || 1;
       context.shadowOffsetY = this.shadow.y || 1;
     }
+
+    if (this.filter) context.filter = this.filter.bundle();
 
     context.fillStyle = this.color;
     if (this.border?.color) context.strokeStyle = this.border.color;
@@ -69,7 +74,7 @@ export class ApparatusObject<T> {
     context.lineWidth = this.border?.width || 1;
 
     if (this instanceof Shape.Text) {
-      context.font = this.font.create();
+      context.font = this.font.bundle();
     }
   }
 
@@ -83,7 +88,7 @@ export class ApparatusObject<T> {
     context.globalAlpha = 1;
     context.lineWidth = 1;
     context.font = "arial";
-    context.closePath()
+    context.closePath();
     context.restore();
   }
 
