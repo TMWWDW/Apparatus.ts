@@ -54,6 +54,7 @@ export class ApparatusObject<T> {
 
   protected setContext(context: CanvasRenderingContext2D): void {
     context.save();
+    context.beginPath()
     if (this.shadow) {
       context.shadowColor = this.shadow.color || "black";
       context.shadowBlur = this.shadow.blur || 1;
@@ -82,6 +83,7 @@ export class ApparatusObject<T> {
     context.globalAlpha = 1;
     context.lineWidth = 1;
     context.font = "arial";
+    context.closePath()
     context.restore();
   }
 
@@ -150,7 +152,11 @@ export class ApparatusObject<T> {
     return (this as unknown) as T;
   }
 
-  static DrawShape(context: CanvasRenderingContext2D, radius: number, points: Vector[]) {
+  static DrawShape(
+    context: CanvasRenderingContext2D,
+    radius: number,
+    points: Array<Vector | IVector>
+  ) {
     // Not gonna lie, this part is not mine.
     let i,
       x,
@@ -228,6 +234,5 @@ export class ApparatusObject<T> {
       p1 = p2;
       p2 = p3;
     }
-    context.closePath();
   }
 }

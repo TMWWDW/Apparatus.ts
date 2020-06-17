@@ -307,11 +307,9 @@ export namespace Shape {
       this.setContext(context);
 
       context.beginPath();
-      context.translate(this.position.x, this.position.y);
       context.rotate((this.rotation * Math.PI) / 180);
       ApparatusObject.DrawShape(context, this.border?.radius || 0, this.getVertices());
       context.rotate((-this.rotation * Math.PI) / 180);
-      context.translate(-this.position.x, -this.position.y);
 
       if (this.stroked) {
         context.stroke();
@@ -343,8 +341,8 @@ export namespace Shape {
       for (let i = 0; i <= this.vertex; i++) {
         result.push(
           new Vector({
-            x: this.radius * Math.cos((i * 2 * Math.PI) / this.vertex),
-            y: this.radius * Math.sin((i * 2 * Math.PI) / this.vertex),
+            x: this.radius * Math.cos((i * 2 * Math.PI) / this.vertex) + this.position.x,
+            y: this.radius * Math.sin((i * 2 * Math.PI) / this.vertex) + this.position.y,
           })
         );
       }
@@ -534,14 +532,7 @@ export namespace Shape {
     draw(context: CanvasRenderingContext2D): Free {
       this.setContext(context);
 
-      context.beginPath();
-      context.moveTo(this.position.x, this.position.y);
-      this.vertices.forEach((point, i) => {
-        if (i !== 0) {
-          context.lineTo(point.x, point.y);
-        }
-      });
-      context.lineTo(this.position.x, this.position.y);
+      ApparatusObject.DrawShape(context, this.border?.radius || 0, this.vertices);
 
       if (this.stroked) {
         context.stroke();
