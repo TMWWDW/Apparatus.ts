@@ -2,6 +2,7 @@ import { Size, ISize } from "./size";
 import { IVector, Vector } from "./vector";
 import { Shape } from "./shape";
 import { ApparatusObject } from "./object";
+import { Filter } from "./filter";
 
 export type TShape =
   | Shape.Circle
@@ -26,12 +27,22 @@ export interface ISceneObject {
 
 export interface IScene extends Partial<ISize> {
   color?: string | CanvasPattern | CanvasGradient;
+  opacity?: number;
+  rotation?: number;
+  translate?: number;
+  filter?: Filter;
+  border?: IBorder;
 }
 
 export default class Scene {
   context: CanvasRenderingContext2D;
   objects: ISceneObject[];
   color: string | CanvasPattern | CanvasGradient;
+  opacity: number;
+  rotation: number;
+  translate: number;
+  filter: Filter;
+  border: IBorder;
 
   layers: { minimum: number; maximum: number };
 
@@ -43,6 +54,11 @@ export default class Scene {
     this.canvas.width = options?.width || window.innerWidth;
     this.canvas.height = options?.height || window.innerHeight;
     this.color = options?.color || null;
+    this.opacity = options?.opacity || 1;
+    this.rotation = options?.rotation || 0;
+    this.translate = options?.translate || null;
+    this.filter = options?.filter || null;
+    this.border = options?.border || null;
     this.objects = [];
     this.layers = {
       minimum: 0,
@@ -74,12 +90,20 @@ export default class Scene {
 
   render(): void {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.save();
+    
+    this.context.globalAlpha = this.opacity;
+    this.context.lineWidth = this.border?.width || 1;
     if (this.color) {
-      this.context.save();
       this.context.fillStyle = this.color;
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-      this.context.restore();
     }
+    if (this.border) {
+      this.context.strokeStyle = this.border.color || this.color;
+      this.context.strokeRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    this.context.restore();
 
     this.objects
       .sort((object, compare) => (object.layer < compare.layer ? -1 : 1))

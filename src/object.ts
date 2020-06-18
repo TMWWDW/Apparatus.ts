@@ -4,7 +4,6 @@ import Scene, {
   IShadow,
   TShape,
   TArrangeMethod,
-  TImage,
   Filter,
   TApparatusObjectEvent,
   IApparatusObjectEvent,
