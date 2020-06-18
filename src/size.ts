@@ -32,4 +32,17 @@ export class Size {
   map(callbackfn: (point: number) => any): Size {
     return new Size({ width: callbackfn(this.width), height: callbackfn(this.height) });
   }
+
+  static FromHTMLElement(element: HTMLElement): Size {
+    let { width, height } = element.getBoundingClientRect();
+    return new Size({ width, height });
+  }
+
+  static FromPair(width: number, height: number): Size {
+    return new Size({ width, height });
+  }
+
+  static FromArray(array: [number, number] | number[]): Size {
+    return new Size({ width: array[0], height: array[1] });
+  }
 }

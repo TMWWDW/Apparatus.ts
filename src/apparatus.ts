@@ -84,6 +84,12 @@ export default class Scene {
     };
     draw();
   }
+
+  static GenerateCanvas(): HTMLCanvasElement {
+    let canvas = document.createElement("canvas");
+    document.body.appendChild(canvas);
+    return canvas;
+  }
 }
 
 export type TImage = HTMLImageElement | SVGImageElement | HTMLVideoElement | HTMLCanvasElement;

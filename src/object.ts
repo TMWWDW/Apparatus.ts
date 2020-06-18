@@ -24,7 +24,7 @@ export class ApparatusObject<T> {
   border: IBorder;
   shadow: IShadow;
   clip: Shape.Image;
-  filter?: Filter;
+  filter: Filter;
   constructor(options?: IApparatusObject) {
     this.color = options?.color || "#222222";
     this.rotation = options?.rotation || 0;

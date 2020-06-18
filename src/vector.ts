@@ -67,4 +67,16 @@ export class Vector {
   map(callbackfn: (point: number) => any): Vector {
     return new Vector({ x: callbackfn(this.x), y: callbackfn(this.y) });
   }
+
+  static FromMouseEvent(e: MouseEvent): Vector {
+    return new Vector({ x: e.clientX, y: e.clientY });
+  }
+
+  static FromPair(x: number, y: number): Vector {
+    return new Vector({ x, y });
+  }
+
+  static FromArray(array: [number, number] | number[]): Vector {
+    return new Vector({ x: array[0], y: array[1] });
+  }
 }
