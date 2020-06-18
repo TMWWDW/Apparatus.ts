@@ -1,5 +1,14 @@
 import { Vector, IVector } from "./vector";
-import Scene, { IBorder, IShadow, TShape, TArrangeMethod, TImage, Filter } from "./apparatus";
+import Scene, {
+  IBorder,
+  IShadow,
+  TShape,
+  TArrangeMethod,
+  TImage,
+  Filter,
+  TApparatusObjectEvent,
+  IApparatusObjectEvent,
+} from "./apparatus";
 import { Shape } from "./shape";
 
 export interface IApparatusObject {
@@ -25,6 +34,7 @@ export class ApparatusObject<T> {
   shadow: IShadow;
   clip: Shape.Image;
   filter: Filter;
+  private events: IApparatusObjectEvent[];
   constructor(options?: IApparatusObject) {
     this.color = options?.color || "#222222";
     this.rotation = options?.rotation || 0;
@@ -35,6 +45,7 @@ export class ApparatusObject<T> {
     this.clip = options?.clip || null;
     this.filter = options?.filter || null;
     this.owners = [];
+    this.events = [];
   }
 
   draw(_context: CanvasRenderingContext2D): T {
@@ -42,6 +53,7 @@ export class ApparatusObject<T> {
   }
 
   scale(_scale: number): T {
+    this.events.filter((e) => e.name === "scale").forEach((e) => e.callbackfn());
     console.warn(
       "It seems that this shape's scaling algorithm has not been implemented yet. This method will return the ApparatusObject<T> instance that the shape extends to."
     );
@@ -49,14 +61,19 @@ export class ApparatusObject<T> {
   }
   rotate(angle: number): T {
     this.rotation = angle;
+    this.events.filter((e) => e.name === "rotate").forEach((e) => e.callbackfn());
     return (this as unknown) as T;
   }
   setAnchor(_position: Vector | IVector): T {
+    this.events.filter((e) => e.name === "set-anchor").forEach((e) => e.callbackfn());
     throw new Error("Method not implemented yet!");
   }
 
   protected setContext(context: CanvasRenderingContext2D): void {
     context.save();
+    this.events
+      .filter((e) => e.name === "draw-start")
+      .forEach((e) => e.callbackfn((this as unknown) as T));
     context.beginPath();
     if (this.shadow) {
       context.shadowColor = this.shadow.color || "black";
@@ -89,17 +106,27 @@ export class ApparatusObject<T> {
     context.lineWidth = 1;
     context.font = "arial";
     context.closePath();
+    this.events
+      .filter((e) => e.name === "draw-end")
+      .forEach((e) => e.callbackfn((this as unknown) as T));
     context.restore();
   }
 
   bind(scene: Scene): T {
     this.owners.push(scene);
     scene.add((this as unknown) as ApparatusObject<TShape>);
+    this.events.filter((e) => e.name === "bind").forEach((e) => e.callbackfn());
     return (this as unknown) as T;
   }
   unbind(scene: Scene): T {
     this.owners.splice(this.owners.indexOf(scene), 1);
     scene.remove((this as unknown) as ApparatusObject<TShape>);
+    this.events.filter((e) => e.name === "unbind").forEach((e) => e.callbackfn());
+    return (this as unknown) as T;
+  }
+
+  on(event: TApparatusObjectEvent, callbackfn: Function): T {
+    this.events.push({ name: event, callbackfn });
     return (this as unknown) as T;
   }
 
@@ -134,6 +161,7 @@ export class ApparatusObject<T> {
           owner.arrangeLayer((this as unknown) as ApparatusObject<TShape>, instance.layer + 1);
           break;
       }
+      this.events.filter((e) => e.name === "arrange").forEach((e) => e.callbackfn());
     } else {
       throw new Error(
         "Cannot find the specified scene or this shape has not been bound to any scene at all."

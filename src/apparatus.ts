@@ -24,19 +24,25 @@ export interface ISceneObject {
   visible: boolean;
 }
 
+export interface IScene extends Partial<ISize> {
+  color?: string | CanvasPattern | CanvasGradient;
+}
+
 export default class Scene {
   context: CanvasRenderingContext2D;
   objects: ISceneObject[];
+  color: string | CanvasPattern | CanvasGradient;
 
   layers: { minimum: number; maximum: number };
 
-  constructor(public canvas: HTMLCanvasElement, size?: ISize | Size) {
+  constructor(public canvas: HTMLCanvasElement, options?: IScene) {
     if (!this.canvas) {
       throw new Error("Given source element is not present inside the current page.");
     }
     this.context = canvas.getContext("2d");
-    this.canvas.width = size?.width || window.innerWidth;
-    this.canvas.height = size?.height || window.innerHeight;
+    this.canvas.width = options?.width || window.innerWidth;
+    this.canvas.height = options?.height || window.innerHeight;
+    this.color = options?.color || null;
     this.objects = [];
     this.layers = {
       minimum: 0,
@@ -68,6 +74,12 @@ export default class Scene {
 
   render(): void {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    if (this.color) {
+      this.context.save();
+      this.context.fillStyle = this.color;
+      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.context.restore();
+    }
 
     this.objects
       .sort((object, compare) => (object.layer < compare.layer ? -1 : 1))
@@ -94,6 +106,21 @@ export default class Scene {
 
 export type TImage = HTMLImageElement | SVGImageElement | HTMLVideoElement | HTMLCanvasElement;
 export type TArrangeMethod = "back" | "backwards" | "front" | "forwards";
+export type TApparatusObjectEvent =
+  | "bind"
+  | "unbind"
+  | "draw-start"
+  | "draw-end"
+  | "scale"
+  | "rotate"
+  | "set-anchor"
+  | "arrange"
+  | "set-visibility";
+
+export interface IApparatusObjectEvent {
+  name: TApparatusObjectEvent;
+  callbackfn: Function;
+}
 
 export interface IBorder {
   segments?: number[];
